@@ -330,24 +330,24 @@ public:
     for (int i = 0; i < numVariables; i++) {
     for (int j = i+1; j < numVariables; j++) {
 
-      // Potts defined as meanfield library
-      // -cost when label i = label j 
-      if (map[i] == map[j])
-      {
-        std::pair<int,int> p0 = linear2sub(i);
-        std::pair<int,int> p1 = linear2sub(j);
-
-        cost -= pairwiseCost(p0,p1);
-      }
-
-      // // Usual definition
-      // if (map[i] != map[j])
+      // // Potts defined as meanfield library
+      // // -cost when label i = label j 
+      // if (map[i] == map[j])
       // {
       //   std::pair<int,int> p0 = linear2sub(i);
       //   std::pair<int,int> p1 = linear2sub(j);
 
-      //   cost += pairwiseCost(p0,p1);
+      //   cost -= pairwiseCost(p0,p1);
       // }
+
+      // Usual definition
+      if (map[i] != map[j])
+      {
+        std::pair<int,int> p0 = linear2sub(i);
+        std::pair<int,int> p1 = linear2sub(j);
+
+        cost += pairwiseCost(p0,p1);
+      }
     }
     }
 

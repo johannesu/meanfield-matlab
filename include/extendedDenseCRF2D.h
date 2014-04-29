@@ -26,6 +26,14 @@ public:
     for (int i = 0; i < W_*H_; i++)
       energy -= pairwise(i);
 
+    // Correct for negative weighted potts.
+    // the pairwise cost is -w[a==b], but the paper states w[a!=b].
+    map *= 0;
+    pairwise = pairwiseEnergy( map );
+    
+    for (int i = 0; i < W_*H_; i++)
+      energy += pairwise(i);
+
     return energy;
   }
 };

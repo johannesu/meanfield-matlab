@@ -11,9 +11,7 @@
 %   d) trws						 : Tree-reweighted message passing algorithm.  
 %
 % Remarks:
-% The energy reported is calculate via approximate filtering and is approximate.
-% Furthermore the potts cost is -[x==y] instead of the usual +[x!=y],
-% adding more regularization may result in lower energy.
+% The energy reported is calculated via approximate filtering.
 % Exact energy may be calculate via the exact_energy method
 %
 % WARNING: 
@@ -61,8 +59,9 @@ classdef Densecrf < handle
 	properties (SetAccess = protected)
 		im_stacked;
 		unary_stacked;
-		
+		lower_bound = -inf;
 		energy = nan;
+		relative_gap;
 	end
 	
 	properties (Hidden)
@@ -210,11 +209,11 @@ classdef Densecrf < handle
 			self.get_energy = false;
 			self.segmentation = segmentation;
 			self.get_energy = tmp;
-
 			self.energy = energy;
+			self.lower_bound = bound;
 			self.solver = 'meanfield';
 		end
-		
+
 		function [segmentation, energy, bound] = trws(self)
 			settings = self.gather_settings;
 			settings.solver = 'TRWS';
@@ -224,11 +223,12 @@ classdef Densecrf < handle
 			
 			segmentation = segmentation+1;
 			self.segmentation = segmentation;
+			self.lower_bound = lower_bound;
 			self.solver = 'trws';
 		end
 		
 		% Calculate exact energy of current solution
-		function calculate_energy(self)
+		function energy = calculate_energy(self)
 			self.compile('energy');
 			settings = self.gather_settings;
 			segmentation = int16(self.segmentation - 1);
@@ -258,8 +258,8 @@ classdef Densecrf < handle
 				subplot(1,2,2);
 				imagesc(self.segmentation);
 				axis equal; axis off;
-				title(sprintf('\n Energy: %g. \n Solver: %s', ...
-										 self.energy, self.solver));
+				title(sprintf('\n Energy: %g. \n Lower bound: %g. \n Relative gap: %g. \n Solver: %s.', ...
+										 self.energy, self.lower_bound, self.relative_gap, self.solver));
 			end
 		
 			details(self);
@@ -277,8 +277,17 @@ classdef Densecrf < handle
 				
 			self.segmentation = ceil(rand(self.image_size(1:2))*self.num_labels());
 		end
+		
+		% No regularization cost
+		function lower_bound = unary_lower_bound(self)
+			lower_bound = sum(sum(min(self.unary,[],3)));
+		end
 
 		% set/get methods
+		function gap = get.relative_gap(self)
+			gap = (self.energy - self.lower_bound)/abs(self.energy);
+		end
+
 		function set.im(self, im)
 			self.im = im;
 			
@@ -317,6 +326,7 @@ classdef Densecrf < handle
 				self.energy = nan;
 			end
 
+			self.lower_bound = self.unary_lower_bound();
 			self.solver = '';
 		end
 		

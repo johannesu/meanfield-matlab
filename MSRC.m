@@ -229,8 +229,8 @@ classdef MSRC < Densecrf
 				imagesc(self.segmentation);
 				axis equal; axis off;
 				caxis([1 21]);
-				title(sprintf('Energy:  %g.  \n Score: %g \n Solver: %s \n', ...
-					self.energy, self.score(), self.solver));
+				title(sprintf('Energy:  %g.\n Lower bound: %g. \n Relative gap: %g \n Score: %g. \n Solver: %s. \n', ...
+					self.energy, self.lower_bound, self.relative_gap, self.score(), self.solver));
 			end
 		end
 	end
