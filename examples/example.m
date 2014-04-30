@@ -28,8 +28,10 @@ figure(2);
 D.meanfield;
 D.display();
 
-%% TRW-S (slow)
-figure()
-D.min_pairwise_cost = 1;
-D.trws;
-D.display()
+% %% TRW-S (adding very few edges)
+% figure()
+% 
+% % set to zero to solve the densecrf problem (requires alot of memory)
+% D.min_pairwise_cost = 1; 
+% D.trws;
+% D.display()

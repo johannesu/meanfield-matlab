@@ -61,7 +61,7 @@ classdef Densecrf < handle
 		unary_stacked;
 		lower_bound = -inf;
 		energy = nan;
-		relative_gap;
+		energy_gap;
 	end
 	
 	properties (Hidden)
@@ -258,8 +258,9 @@ classdef Densecrf < handle
 				subplot(1,2,2);
 				imagesc(self.segmentation);
 				axis equal; axis off;
-				title(sprintf('\n Energy: %g. \n Lower bound: %g. \n Relative gap: %g. \n Solver: %s.', ...
-										 self.energy, self.lower_bound, self.relative_gap, self.solver));
+			 title(sprintf('Energy:  %2.2e\nLower bound: %2.2e\n Gap: %2.2e\nSolver: %s', ...
+					self.energy, self.lower_bound, self.energy_gap,  self.solver), ...
+					'Units', 'normalized', 'Position', [1 0.8], 'HorizontalAlignment', 'right');
 			end
 		
 			details(self);
@@ -284,8 +285,8 @@ classdef Densecrf < handle
 		end
 
 		% set/get methods
-		function gap = get.relative_gap(self)
-			gap = (self.energy - self.lower_bound)/abs(self.energy);
+		function gap = get.energy_gap(self)
+			gap = (self.energy - self.lower_bound);
 		end
 
 		function set.im(self, im)
