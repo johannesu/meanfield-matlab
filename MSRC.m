@@ -169,7 +169,7 @@ classdef MSRC < Densecrf
 				%labels to RBG fig 1 textonboost.
 				%reading row before columns [1 2 3 4.....; 11 12...]
 				
-				lab_to_rgb = zeros(21,3);
+				lab_to_rgb = zeros(23,3);
 				lab_to_rgb(1,:) = [128 0 0];
 				lab_to_rgb(2,:) =  [0 128 0]; % Grass
 				lab_to_rgb(3,:) =  [128 128 0];
@@ -209,15 +209,15 @@ classdef MSRC < Densecrf
 				for i = 1:size(fast_index,1)
 					L(fast_im == fast_index(i)) = i;
 				end
-				
-				% Unkown class removed
-				L(L == 23) = 22;
-				
+								
 				L = reshape(L, sz(1:2));
 				
 				if any(L == 0)
 					error('Not valid RGB label')
 				end
+
+				% These labels lack unary cost
+				L(L > 21) = 0;
 			end
 			
 			function display(self)
