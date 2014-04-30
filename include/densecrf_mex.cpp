@@ -140,6 +140,7 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
       TypePotts::REAL TRWSenergy, TRWSlb;
       TRWSOptions options;
       options.m_iterMax = iterations;
+      options.m_eps = 0;
 
       if (!debug)
         options.m_printMinIter = iterations+2;
