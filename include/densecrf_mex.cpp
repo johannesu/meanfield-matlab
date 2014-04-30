@@ -47,7 +47,7 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
 
     // Calculate number of labels
     const int UC = unary_matrix.numel();
-    const size_t numberOfLabels = UC/(M*N);
+    const int numberOfLabels = UC/(M*N);
     
     // Read image and unary
     const unsigned char * image  = im_matrix.data;
@@ -148,7 +148,7 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
       TRWS * mrf = new TRWS(TypePotts::GlobalSize(numberOfLabels),erfunc);
       TRWSNodes * nodes = new TRWSNodes[numVariables];
 
-      TypePotts::REAL D[numberOfLabels];
+      std::vector<TypePotts::REAL> D(numberOfLabels);
 
       for (int i = 0; i < numVariables; i++) 
       {
@@ -159,12 +159,12 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
         }
 
         nodes[i] = mrf->AddNode(TypePotts::LocalSize(), 
-                                TypePotts::NodeData(D));
+                                TypePotts::NodeData(&D[0]));
       }
 
       // Pairwise cost 
-      for (size_t i = 0; i < numVariables; i++) {
-      for (size_t j = i+1; j < numVariables; j++) {  
+      for (int i = 0; i < numVariables; i++) {
+      for (int j = i+1; j < numVariables; j++) {  
         std::pair<int,int> p0 = linear2sub(i);
         std::pair<int,int> p1 = linear2sub(j);
 

@@ -8,7 +8,7 @@ public:
 	ProbImage();
 	ProbImage( const ProbImage & o );
 	~ProbImage();
-	ProbImage & operator=( const ProbImage & o );
+	//ProbImage & operator=( const ProbImage & o );
 	
 	// Load and save
 	void load( const char * file );

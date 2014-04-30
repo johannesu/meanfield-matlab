@@ -159,7 +159,10 @@ classdef Densecrf < handle
 			extra_arguments{end+1} = ['-I' my_path];
 			extra_arguments{end+1} = ['-I' eigen_path];
 			extra_arguments{end+1} = ['-I' lbfgs_include_path];
-			extra_arguments{end+1} = ['-lgomp'];
+			
+			if ~ispc
+				extra_arguments{end+1} = ['-lgomp'];
+			end
 			
 			% Additional files to be compiled.
 			mf_dir = ['densecrf' filesep 'src' filesep];

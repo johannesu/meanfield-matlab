@@ -2,7 +2,6 @@
 #include "mex.h"
 #include "mexutils.h"
 #include "cppmatrix.h"
-#include <cstdio>
 #include "probImage/probimage.h"
 
 void mexFunction(int nlhs, 		    /* number of expected outputs */

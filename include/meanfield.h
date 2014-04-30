@@ -26,7 +26,7 @@ double get_wtime()
 #include <ctime>
 double get_wtime()
 {
-  return std::time(0);
+  return (double)std::time(0);
 }
 #endif
 
@@ -62,17 +62,17 @@ struct PairwiseWeights
 {
   PairwiseWeights(MexParams params)
   {
-    gaussian_x_stddev = params.get<double>("gaussian_x_stddev", 3);
-    gaussian_y_stddev = params.get<double>("gaussian_y_stddev", 3);
-    gaussian_weight = params.get<double>("gaussian_weight", 1);
+    gaussian_x_stddev = (float)params.get<double>("gaussian_x_stddev", 3);
+    gaussian_y_stddev = (float)params.get<double>("gaussian_y_stddev", 3);
+    gaussian_weight = (float)params.get<double>("gaussian_weight", 1);
     
-    bilateral_x_stddev = params.get<double>("bilateral_x_stddev", 60);
-    bilateral_y_stddev = params.get<double>("bilateral_y_stddev", 60);
-    bilateral_weight = params.get<double>("bilateral_weight", 1);
+    bilateral_x_stddev = (float)params.get<double>("bilateral_x_stddev", 60);
+    bilateral_y_stddev = (float)params.get<double>("bilateral_y_stddev", 60);
+    bilateral_weight = (float)params.get<double>("bilateral_weight", 1);
     
-    bilateral_r_stddev = params.get<double>("bilateral_r_stddev", 20);
-    bilateral_g_stddev = params.get<double>("bilateral_g_stddev", 20);
-    bilateral_b_stddev = params.get<double>("bilateral_b_stddev", 20); 
+    bilateral_r_stddev = (float)params.get<double>("bilateral_r_stddev", 20);
+    bilateral_g_stddev = (float)params.get<double>("bilateral_g_stddev", 20);
+    bilateral_b_stddev = (float)params.get<double>("bilateral_b_stddev", 20); 
 
     gaussian_norm = 1;
     bilateral_norm = 1;
@@ -216,6 +216,10 @@ inline double square(int x){
     return (double)x*x;
 }
 
+inline float square(float x){
+  return x*x;
+}
+
 inline double square(double x){
   return x*x;
 }
@@ -261,7 +265,7 @@ class PairwiseCost
 
   float bilateral_cost(int x0, int y0, int x1, int y1)
   {
-      return exp(
+      return (float)exp(
               - ( square(x0-x1) / wbx ) 
               - ( square(y0-y1) / wby ) 
               - ( square(image[imageLinearIndex(x0,y0,0)] - image[imageLinearIndex(x1,y1,0)])/ wbr )
@@ -272,7 +276,7 @@ class PairwiseCost
 
   float gaussian_cost(int x0, int y0, int x1, int y1)
   {
-    return exp(
+    return (float)exp(
             - ( square(x0-x1)/ wgx ) 
             - ( square(y0-y1)/ wgy ) 
           );
@@ -282,17 +286,17 @@ class PairwiseCost
     LinearIndex imageLinearIndex;
 
     // Scaling constnat for (B)ilteral and (G)aussian weights.
-    double wbx;
-    double wby;
-    double wbr;
-    double wbg;
-    double wbb;
+    float wbx;
+    float wby;
+    float wbr;
+    float wbg;
+    float wbb;
 
-    double wgx;
-    double wgy;
+    float wgx;
+    float wgy;
 
-    double bilateral_weight;
-    double gaussian_weight;
+    float bilateral_weight;
+    float gaussian_weight;
 };
 
 // Calculate energy for DenseCRF solutions

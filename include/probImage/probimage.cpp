@@ -4,7 +4,14 @@
 #include <cstdlib>
 #include <cmath>
 // Endian convertion
-#include <netinet/in.h>
+
+#ifdef _WIN32
+	#include "winsock2.h"
+	#include <stdint.h>
+	#pragma comment(lib, "ws2_32.lib")
+#else
+	#include <netinet/in.h>
+#endif
 
 ProbImage::ProbImage() :data_(NULL),width_(0),height_(0),depth_(0){
 }
@@ -12,12 +19,14 @@ ProbImage::ProbImage(const ProbImage& o) : width_( o.width_ ), height_( o.height
 	data_ = new float[ width_*height_*depth_ ];
 	memcpy( data_, o.data_, width_*height_*depth_*sizeof(float) );
 }
+/*
 ProbImage& ProbImage::operator=(const ProbImage& o) {
 	width_ = o.width_; height_ = o.height_; depth_ = o.depth_;
 	if( data_ ) delete[] data_;
 	data_ = new float[ width_*height_*depth_ ];
 	memcpy( data_, o.data_, width_*height_*depth_*sizeof(float) );
 }
+*/
 ProbImage::~ProbImage(){
 	if( data_ ) delete[] data_;
 }
@@ -26,6 +35,7 @@ static void readBuf32( FILE * fp, unsigned int size, uint32_t * buf ){
 	for( int i=0; i<size; i++ )
 		buf[i] = ntohl( buf[i] );
 }
+
 static void writeBuf32( FILE * fp, unsigned int size, uint32_t * buf ){
 	uint32_t sbuf[(1<<13)];
 	for( int i=0; i<size; i+=(1<<13) ){
@@ -44,6 +54,7 @@ void ProbImage::load(const char* file) {
 	readBuf32( fp, width_*height_*depth_, (uint32_t*)data_ );
 	fclose( fp );
 }
+
 void ProbImage::save(const char* file) {
 	FILE* fp = fopen( file, "wb" );
 	uint32_t buf[] = {width_, height_, depth_};
@@ -137,6 +148,7 @@ void ProbImage::compress(const char* file, float eps) {
 	delete[] ukeys;
 	delete[] ids;
 }
+
 void ProbImage::decompress(const char* file) {
 	FILE* fp = fopen( file, "rb" );
 	uint32_t buf[5];

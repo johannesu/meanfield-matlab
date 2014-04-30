@@ -1,8 +1,6 @@
 % Compile files only if needed
 function compile(cpp_file, out_file, sources, extra_arguments)
 
-extra_arguments{end+1} = '-lrt';
-
 % Process
 my_name = mfilename('fullpath');
 my_path = [fileparts(my_name)];

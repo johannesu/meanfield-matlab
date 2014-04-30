@@ -32,7 +32,7 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
 
   // Calculate number of labels
   const int UC = unary_matrix.numel();
-  const size_t numberOfLabels = UC/(M*N);
+  const int numberOfLabels = UC/(M*N);
   int numVariables = M*N;
 
   // Creating linear index functor
@@ -83,7 +83,7 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
     energy(0) = energyFunctor(map);
   } else
   {
-    energy(0) = 0.0/0.0;
+    energy(0) = std::numeric_limits<double>::quiet_NaN();
   }
 
   matrix<double> mf_energy(1);
