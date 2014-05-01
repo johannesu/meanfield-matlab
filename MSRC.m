@@ -6,6 +6,10 @@ classdef MSRC < Densecrf
 		gt;
 	end
 	
+	properties (Hidden)
+		msrc_root;
+	end
+
 	methods (Static)
 		% Wrapper for probImage decompress
 		function decompressed =  decompress(file_path)
@@ -30,6 +34,21 @@ classdef MSRC < Densecrf
 			
 			decompressed =  decompress_mex(file_path);
 		end
+
+		% Returns all image names in a cell.
+		function names = all_images(msrc_root)
+			if nargin < 1
+				msrc_root = ['..' filesep 'data' filesep 'MSRC'];
+			end
+
+			image_path = [msrc_root filesep 'Images'];
+			f = dir([image_path filesep '*.bmp']);
+			names = extractfield(f,'name');
+			
+			for n = 1:numel(names)
+				[~,names{n}] = fileparts(names{n});
+			end
+		end	
 	end
 	
 	methods
@@ -55,13 +74,15 @@ classdef MSRC < Densecrf
 			
 			% Load ground truth
 			% MSRC
-			gt_folder = ['..' filesep 'data' filesep 'MSRC' filesep 'GroundTruth'];
+			msrc_root = ['..' filesep 'data' filesep 'MSRC'];
+
+			gt_folder = [msrc_root filesep 'GroundTruth'];
 			
 			% Prefer hq if it exist (not done for every image).
-			gt_hq_folder = ['..' filesep 'data' filesep 'MSRC' filesep 'SegmentationsGTHighQuality'];
+			gt_hq_folder = [msrc_root filesep 'SegmentationsGTHighQuality'];
 			
 			% Another set this one by Krähenbühl
-			gt_hq_folder2 =['..' filesep 'data' filesep 'MSRC' filesep 'HighQuality'];
+			gt_hq_folder2 =[msrc_root filesep 'HighQuality'];
 			
 			if ~exist(gt_folder)
 				disp 'WARNING: Missing GT folder';
@@ -97,6 +118,7 @@ classdef MSRC < Densecrf
 			end
 			
 			self.gt = self.RGB2label(gt);
+			self.msrc_root = msrc_root;
 		end
 		
 		function score = score(self)
@@ -212,14 +234,10 @@ classdef MSRC < Densecrf
 								
 				L = reshape(L, sz(1:2));
 				
-				if any(L == 0)
-					error('Not valid RGB label')
-				end
-
 				% These labels lack unary cost
 				L(L > 21) = 0;
 			end
-			
+
 			function display(self)
 				display@Densecrf(self);
 				self.display_result_only();
@@ -231,7 +249,7 @@ classdef MSRC < Densecrf
 				caxis([1 21]);
 			 title(sprintf('Energy:  %2.2e\nLower bound: %2.2e\n Gap: %2.2e\nScore: %g\nSolver: %s', ...
 					self.energy, self.lower_bound, self.energy_gap, self.score(), self.solver), ...
-					'Units', 'normalized', 'Position', [1 1], 'HorizontalAlignment', 'right');
+					'Units', 'normalized', 'Position', [1 0.8], 'HorizontalAlignment', 'right');
 			end
 		end
 	end
