@@ -43,7 +43,7 @@ enum KernelType {
 
 class Kernel {
 public:
-	~Kernel();
+	virtual ~Kernel();
 	virtual void apply( MatrixXf & out, const MatrixXf & Q ) const = 0;
 	virtual void applyTranspose( MatrixXf & out, const MatrixXf & Q ) const = 0;
 	virtual VectorXf parameters() const = 0;
@@ -58,7 +58,7 @@ protected:
 	PairwisePotential( const PairwisePotential &o ){}
 	void filter( MatrixXf & out, const MatrixXf & in, bool transpose=false ) const;
 public:
-	~PairwisePotential();
+	virtual ~PairwisePotential();
 	PairwisePotential(const MatrixXf & features, LabelCompatibility * compatibility, KernelType ktype=CONST_KERNEL, NormalizationType ntype=NORMALIZE_SYMMETRIC);
 	void apply(MatrixXf & out, const MatrixXf & Q) const;
 	void applyTranspose(MatrixXf & out, const MatrixXf & Q) const;
