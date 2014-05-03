@@ -4,18 +4,22 @@
 % Efficient Inference in Fully Connected CRFs with Gaussian Edge Potentials
 % NIPS 2011 
 %
-% 1. Solvers
-%   a) meanfield 			 : Krähenbühls' meanfield implementation
-%   b) meanfield_matlab: Very slow but non approximate meanfield implementation.
-%		c) threshold       : Returns threhold solution of the unary cost
-%   d) trws						 : Tree-reweighted message passing algorithm.  
+% 	Solvers:
+%	mean_field          : Krähenbühls' mean field approximation implementation (uses fast filtering)
+%	mean_field_explicit : Slower but more exact mean field approximation implementation (perform all summations)
+%	threshold           : thresholds the unary cost
+%	trws                : Tree-reweighted message passing algorithm.  
+% 
+%	Debug method:
+%	random_solution     : sets a random solution
+%	most_probable_label : returns the single label solution with lowest energy.
 %
 % Remarks:
 % The energy reported is calculated via approximate filtering.
 % Exact energy may be calculate via the exact_energy method
 %
 % WARNING: 
-% If NormalizationType is changed the problem meanfield solves is 
+% If NormalizationType is changed the problem mean_field solves is 
 % redefined and the other solvers solves a different problem.
 %
 classdef Densecrf < handle
@@ -185,12 +189,16 @@ classdef Densecrf < handle
 			compile(cpp_file, out_file, sources, extra_arguments)
 		end
 		
-		function segmentation = matlab_meanfield(self)
+		function segmentation = mean_field_explicit(self)
 			settings = self.gather_settings;
-			segmentation = matlab_meanfield(double(self.unary), double(self.im), settings);
-
+			settings.solver = 'mean_field_explicit';
+			self.compile('densecrf');
+			
+			segmentation =  densecrf_mex(self.im_stacked, self.unary_stacked, self.image_size, settings);
+			segmentation = segmentation+1;
+			
 			self.segmentation = segmentation;
-			self.solver = 'matlab meanfield';
+			self.solver = 'mean field approximation (explicit summations)';
 		end
 
 		function segmentation = threshold(self)
@@ -199,9 +207,9 @@ classdef Densecrf < handle
 			self.solver = 'threshold';
 		end
 		
-		function segmentation = meanfield(self)
+		function segmentation = mean_field(self)
 			settings = self.gather_settings;
-			settings.solver = 'MF';
+			settings.solver = 'mean_field';
 			self.compile('densecrf');
 			
 			[segmentation, energy, bound] =  densecrf_mex(self.im_stacked, self.unary_stacked, self.image_size, settings);
@@ -214,12 +222,12 @@ classdef Densecrf < handle
 			self.get_energy = tmp;
 			self.energy = energy;
 			self.lower_bound = bound;
-			self.solver = 'meanfield';
+			self.solver = 'mean field';
 		end
 
 		function [segmentation, energy, bound] = trws(self)
 			settings = self.gather_settings;
-			settings.solver = 'TRWS';
+			settings.solver = 'trws';
 			self.compile('densecrf');
 			
 			[segmentation, energy, lower_bound] =  densecrf_mex(self.im_stacked, self.unary_stacked, self.image_size, settings);
@@ -263,7 +271,7 @@ classdef Densecrf < handle
 				axis equal; axis off;
 			 title(sprintf('Energy:  %2.2e\nLower bound: %2.2e\n Gap: %2.2e\nSolver: %s', ...
 					self.energy, self.lower_bound, self.energy_gap,  self.solver), ...
-					'Units', 'normalized', 'Position', [1 0.8], 'HorizontalAlignment', 'right');
+					'Units', 'normalized', 'Position', [1 1], 'HorizontalAlignment', 'right');
 			end
 		
 			details(self);
@@ -274,14 +282,24 @@ classdef Densecrf < handle
 		end
 
 		% Generate a random solution.
-		function random_solution(self, seed)
+		function segmentation = random_solution(self, seed)
 			if nargin == 2
 				rng(seed)
 			end
 				
-			self.segmentation = ceil(rand(self.image_size(1:2))*self.num_labels());
+			segmentation = ceil(rand(self.image_size(1:2))*self.num_labels());
+			self.segmentation = segmentation;
 		end
 		
+		function segmentation = most_probable_label(self)
+			segmentation = ones(self.image_size(1),self.image_size(2));
+
+			[~,threshold] = min(self.unary,[],3);
+			segmentation(:) = mode(threshold(:));
+
+			self.segmentation = segmentation;
+		end
+
 		% No regularization cost
 		function lower_bound = unary_lower_bound(self)
 			lower_bound = sum(sum(min(self.unary,[],3)));

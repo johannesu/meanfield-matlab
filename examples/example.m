@@ -25,7 +25,7 @@ D.display();
 
 %% Meanfield
 figure(2);
-D.meanfield;
+D.mean_field;
 D.display();
 
 % %% TRW-S (adding very few edges)

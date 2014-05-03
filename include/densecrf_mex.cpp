@@ -1,4 +1,7 @@
-// Solve the complete problem with either mean-field (MF), or tree-reweighted message passings (TRWS)
+// Solve the complete problem with either 
+// (mean_field) mean field approximation using filter 
+// (TRWS) tree-reweighted message passings 
+// (mean_field_explicit) mean field approximation without the filters (solver)
 #include "meanfield.h"
 #include "solvers.h"
 double timer;
@@ -59,7 +62,7 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
     assert(N > 0);
 
 
-    if (solver.compare("MF") && solver.compare("TRWS")) {
+    if (solver.compare("mean_field") && solver.compare("trws") && solver.compare("mean_field_explicit")) {
         mexErrMsgTxt("Unknown solver");
     }
      
@@ -90,7 +93,7 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
     EnergyFunctor energyFunctor(unaryCost, pairwiseCost, M,N, numberOfLabels);
 
     // Mean-field
-    if(!solver.compare("MF"))
+    if(!solver.compare("mean_field"))
     {
       // Setup the CRF model
       extendedDenseCRF2D crf(M,N,numberOfLabels);
@@ -130,8 +133,80 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
       bound(0) = lowestUnaryCost( unary_array, M,N,numberOfLabels );
  
       if (debug)
-        endTime("Solving with MF.");
+        endTime("Solving using mean field approximation and approximate gaussian filters.");
       
+      return;
+    }
+
+    if(!solver.compare("mean_field_explicit"))
+    {
+      // Init
+      matrix<double> Q(M,N,numberOfLabels);
+      matrix<double> addative_sum(M,N,numberOfLabels);
+
+      for (int x = 0; x < M; x++) {
+      for (int y = 0; y < N; y++) {
+      for (int l = 0; l < numberOfLabels; l++) {
+        Q(x,y,l) = exp(-unaryCost(x,y,l)); 
+      }}}
+     
+      normalize(Q);
+
+      for (int i = 0; i < iterations; i++)
+      {           
+        // Pairwise count negative when equal (faster)
+        for (int label = 0; label < numberOfLabels; label++) {
+          for (int x = 0; x < M; x++) {
+          for (int y = 0; y < N; y++) {
+
+            addative_sum(x,y,label) = unaryCost(x,y,label); 
+
+            for (int x_target = 0; x_target < M; x_target++) {
+            for (int y_target = 0; y_target < N; y_target++) {
+              
+              addative_sum(x,y,label) -=
+                pairwiseCost(x, y, x_target, y_target)*
+                Q( x_target, y_target, label );
+            }
+            }
+          }
+          }      
+        }
+
+        for (int i = 0; i < Q.numel(); i++)
+          Q(i) = exp( - addative_sum(i) );
+
+        normalize(Q);
+      } 
+
+      matrix<double> result(M,N);
+      matrix<double> energy(1);
+      matrix<double> bound(1);
+     
+      double max_prob;
+      for (int x = 0; x < M; x++) {
+      for (int y = 0; y < N; y++) {
+        max_prob = Q(x,y,0);
+        result(x,y) = 0;
+
+        for (int l = 1; l < numberOfLabels; l++)
+        {
+          if (Q(x,y,l) > max_prob)
+          {
+            max_prob = Q(x,y,l);
+            result(x,y) = l;  
+          }
+        }
+      } 
+      }
+
+      energy(0) = std::numeric_limits<double>::quiet_NaN();
+      bound(0) = std::numeric_limits<double>::quiet_NaN();
+
+      plhs[0] = result;
+      plhs[1] = energy;
+      plhs[2] = bound; 
+
       return;
     }
 

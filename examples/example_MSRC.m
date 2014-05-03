@@ -9,5 +9,5 @@ M.bilateral_weight =1;
 M.gaussian_weight = 1;
 
 %%
-M.meanfield();
+M.mean_field();
 M.display()

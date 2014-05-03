@@ -416,3 +416,21 @@ void threshold_solution(short * map,  const float * unary, int M, int N, int num
   }
   }
 }
+
+void normalize(matrix<double>& Q)
+{
+  double sum = 0;
+  for (int x =0; x < Q.M; x++) {
+  for (int y =0; y < Q.N; y++) {
+
+    sum = Q(x,y,0);
+    for (int l = 1; l < Q.O; l++)
+      sum += Q(x,y,l);
+
+    for (int l = 0; l < Q.O; l++)
+      Q(x,y,l) /= sum;
+  } 
+  }
+
+  return;
+}

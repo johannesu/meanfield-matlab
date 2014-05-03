@@ -249,7 +249,7 @@ classdef MSRC < Densecrf
 				caxis([1 21]);
 			 title(sprintf('Energy:  %2.2e\nLower bound: %2.2e\n Gap: %2.2e\nScore: %g\nSolver: %s', ...
 					self.energy, self.lower_bound, self.energy_gap, self.score(), self.solver), ...
-					'Units', 'normalized', 'Position', [1 0.8], 'HorizontalAlignment', 'right');
+					'Units', 'normalized', 'Position', [1 1], 'HorizontalAlignment', 'right');
 			end
 		end
 	end

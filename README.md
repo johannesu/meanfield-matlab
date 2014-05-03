@@ -11,9 +11,9 @@ How to use?
 ![Image and result](screenshot/screenshot.png)
 Included solvers
 --
-* Meanfield [2].
+* Mean field approximation, using approximate filtering [2].
+* Mean field approximation, performing all summations explicitly (slow). 
 * TRWS-S [3].
-* MATLAB implementation of meanfield (very slow).
 
 
 References

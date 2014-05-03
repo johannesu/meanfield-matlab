@@ -13,7 +13,7 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
   matrix<signed short> segmentation(prhs[3]);
 
   const unsigned char * image  = im_matrix.data;
-  const float * unary_array      = unary_matrix.data;
+  float * unary_array      = unary_matrix.data;
   short * map = segmentation.data;
 
   //Structure to hold and parse additional parameters
