@@ -4,15 +4,15 @@
 % Efficient Inference in Fully Connected CRFs with Gaussian Edge Potentials
 % NIPS 2011 
 %
-% 	Solvers:
+%	Solvers:
 %	mean_field          : Krähenbühls' mean field approximation implementation (uses fast filtering)
 %	mean_field_explicit : Slower but more exact mean field approximation implementation (perform all summations)
 %	threshold           : thresholds the unary cost
-%	trws                : Tree-reweighted message passing algorithm.  
+%	trws                : Convergent Tree-reweighted Message Passing .  
 % 
 %	Debug method:
-%	random_solution     : sets a random solution
-%	most_probable_label : returns the single label solution with lowest energy.
+%	random_solution     : Set a random segmentation
+%	most_probable_label : Set the segmentation to the single label with lowest energy.
 %
 % Remarks:
 % The energy reported is calculated via approximate filtering.
@@ -39,14 +39,15 @@ classdef Densecrf < handle
 		debug = false;
 		iterations = 100;
 		
-		% Used for TRWS solver, pairwise cost which are lower then this are not added to the cost function.
+		% Used for trws()
+		% pairwise cost which are lower then this are not added to the cost function.
 		% For larger images this can be used to limit the memory usage. 
 		% The energy will not be correct but the lower bound will still be valid.
 		min_pairwise_cost = 0;
 	
 		segmentation = [];
 
-		% Only used for meanfield solver
+		% Used for mean_field()
 		%	NO_NORMALIZATION,    // No normalization whatsoever (will lead to a substantial approximation error)
 		% NORMALIZE_BEFORE,    // Normalize before filtering (Not used, just there for completeness)
 	  % NORMALIZE_AFTER,     // Normalize after filtering (original normalization in NIPS 11 work)
@@ -57,6 +58,7 @@ classdef Densecrf < handle
 		im;
 		unary;
 
+		% Keep track on which algorithm gave the stored result.
 		solver = '';
 	end
 	
@@ -87,7 +89,7 @@ classdef Densecrf < handle
 			end
 		end
 	
-		% Inverse of colorstack
+		% Inverse of color_stack
 		function out = inverse_color_stack(in, image_size)
 			assert(isvector(in));
 			colors = image_size(3);
@@ -105,6 +107,7 @@ classdef Densecrf < handle
 	end
 		
 	methods
+
 		% Gather and format
 		function settings = gather_settings(self)
 
@@ -235,7 +238,7 @@ classdef Densecrf < handle
 			segmentation = segmentation+1;
 			self.segmentation = segmentation;
 			self.lower_bound = lower_bound;
-			self.solver = 'trws';
+			self.solver = 'TRW-S';
 		end
 		
 		% Calculate exact energy of current solution
@@ -289,6 +292,7 @@ classdef Densecrf < handle
 				
 			segmentation = ceil(rand(self.image_size(1:2))*self.num_labels());
 			self.segmentation = segmentation;
+			self.solver = 'random solution';
 		end
 		
 		function segmentation = most_probable_label(self)
@@ -298,6 +302,7 @@ classdef Densecrf < handle
 			segmentation(:) = mode(threshold(:));
 
 			self.segmentation = segmentation;
+			self.solver = 'most probable label'
 		end
 
 		% No regularization cost

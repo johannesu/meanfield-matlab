@@ -1,7 +1,3 @@
-// Solve the complete problem with either 
-// (mean_field) mean field approximation using filter 
-// (TRWS) tree-reweighted message passings 
-// (mean_field_explicit) mean field approximation without the filters (solver)
 #include "meanfield.h"
 #include "solvers.h"
 double timer;
@@ -10,7 +6,6 @@ double timer;
 static void erfunc(char *err) {
   mexErrMsgTxt(err);
 }
-
 
 void mexFunction(int nlhs, 		    /* number of expected outputs */
         mxArray        *plhs[],	    /* mxArray output pointer array */
@@ -27,7 +22,6 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
     const matrix<float>  unary_matrix(prhs[1]);
     const matrix<unsigned int> im_size(prhs[2]);
 
-    
     //Structure to hold and parse additional parameters
     MexParams params(1, prhs+3);
     
@@ -38,8 +32,6 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
 
     // Used only for TRW-S
     const double min_pairwise_cost = params.get<double>("min_pairwise_cost", 0);
-
-    // Redefine the problem like Krähenbühl
     string solver = params.get<string>("solver", "Not set");      
 
     // The image
@@ -56,11 +48,8 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
     const unsigned char * image  = im_matrix.data;
     float * unary_array  = unary_matrix.data;
  
-    //support solvers MF    - Efficient Inference in Fully Connected CRFs with gaussian edge Potential
-    //                TRWS  - sequential tree-reweighted message passing
     assert(M > 0);
     assert(N > 0);
-
 
     if (solver.compare("mean_field") && solver.compare("trws") && solver.compare("mean_field_explicit")) {
         mexErrMsgTxt("Unknown solver");
@@ -92,9 +81,12 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
     PairwiseCost pairwiseCost(image, pairwiseWeights, imageLinearIndex);
     EnergyFunctor energyFunctor(unaryCost, pairwiseCost, M,N, numberOfLabels);
 
-    // Mean-field
+    // Mean field
     if(!solver.compare("mean_field"))
     {
+      if (debug)
+        endTime("Solving using mean field approximation and approximate gaussian filters.");
+
       // Setup the CRF model
       extendedDenseCRF2D crf(M,N,numberOfLabels);
       Map<MatrixXf> unary(unary_array, numberOfLabels, numVariables);
@@ -131,15 +123,14 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
       
       energy(0) = crf.energy(map);
       bound(0) = lowestUnaryCost( unary_array, M,N,numberOfLabels );
- 
-      if (debug)
-        endTime("Solving using mean field approximation and approximate gaussian filters.");
       
       return;
     }
 
     if(!solver.compare("mean_field_explicit"))
     {
+      if (debug)
+        endTime("Solving using mean field approximation by explicit summation");
       // Init
       matrix<double> Q(M,N,numberOfLabels);
       matrix<double> addative_sum(M,N,numberOfLabels);
@@ -210,8 +201,12 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
       return;
     }
 
-    if(!solver.compare("TRWS")) 
+    if(!solver.compare("trws")) 
     {
+
+      if (debug)
+        endTime("Convergent Tree-reweighted Message Passing");
+
       TypePotts::REAL TRWSenergy, TRWSlb;
       TRWSOptions options;
       options.m_iterMax = iterations;
@@ -260,9 +255,6 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
 
       delete mrf;
       delete nodes;
-
-      if (debug)
-        endTime("Solving with TRWS.");
 
       return;
     }
