@@ -17,22 +17,22 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
     // Parsing data from MATLAB
     if (nrhs != 4)
         mexErrMsgTxt("Expected 3 inputs");
-    
+
     const matrix<unsigned char> im_matrix(prhs[0]);
     const matrix<float>  unary_matrix(prhs[1]);
     const matrix<unsigned int> im_size(prhs[2]);
 
     //Structure to hold and parse additional parameters
     MexParams params(1, prhs+3);
-    
+
     // Weights used to define the energy function
     PairwiseWeights pairwiseWeights(params);
     const bool debug = params.get<bool>("debug", false);
-    const int iterations = params.get<int>("iterations", 20);  
+    const int iterations = params.get<int>("iterations", 20);
 
     // Used only for TRW-S
     const double min_pairwise_cost = params.get<double>("min_pairwise_cost", 0);
-    string solver = params.get<string>("solver", "Not set");      
+    string solver = params.get<string>("solver", "Not set");
 
     // The image
     const int M = im_size(0);
@@ -43,25 +43,25 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
     // Calculate number of labels
     const int UC = unary_matrix.numel();
     const int numberOfLabels = UC/(M*N);
-    
+
     // Read image and unary
     const unsigned char * image  = im_matrix.data;
     float * unary_array  = unary_matrix.data;
- 
+
     assert(M > 0);
     assert(N > 0);
 
     if (solver.compare("mean_field") && solver.compare("trws") && solver.compare("mean_field_explicit")) {
         mexErrMsgTxt("Unknown solver");
     }
-     
+
     // Oracle function to get cost
     LinearIndex unaryLinearIndex(M,N, numberOfLabels);
     LinearIndex imageLinearIndex(M,N, C);
-    
+
     Linear2sub linear2sub(M,N);
     UnaryCost unaryCost(unary_array, unaryLinearIndex);
-   
+
     if (debug)
     {
       mexPrintf("min_pairwise_cost: %g \n", min_pairwise_cost);
@@ -69,14 +69,14 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
 
       endTime("Reading data.");
     }
-      
+
     matrix<double> result(M,N);
     matrix<double> energy(1);
     matrix<double> bound(1);
-     
+
     plhs[0] = result;
     plhs[1] = energy;
-    plhs[2] = bound; 
+    plhs[2] = bound;
 
     PairwiseCost pairwiseCost(image, pairwiseWeights, imageLinearIndex);
     EnergyFunctor energyFunctor(unaryCost, pairwiseCost, M,N, numberOfLabels);
@@ -92,27 +92,27 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
       Map<MatrixXf> unary(unary_array, numberOfLabels, numVariables);
 
       crf.setUnaryEnergy( unary );
-          
+
       KernelType kerneltype = CONST_KERNEL;
       NormalizationType normalizationtype = parseNormalizationType(params);
 
       // Setup  pairwise cost
-      crf.addPairwiseGaussian(pairwiseWeights.gaussian_x_stddev, 
-                              pairwiseWeights.gaussian_y_stddev, 
+      crf.addPairwiseGaussian(pairwiseWeights.gaussian_x_stddev,
+                              pairwiseWeights.gaussian_y_stddev,
                               new PottsCompatibility(pairwiseWeights.gaussian_weight),
                               kerneltype,
                               normalizationtype);
-    
-      crf.addPairwiseBilateral(pairwiseWeights.bilateral_x_stddev, 
+
+      crf.addPairwiseBilateral(pairwiseWeights.bilateral_x_stddev,
                                pairwiseWeights.bilateral_y_stddev,
-                               pairwiseWeights.bilateral_r_stddev, 
-                               pairwiseWeights.bilateral_g_stddev, 
+                               pairwiseWeights.bilateral_r_stddev,
+                               pairwiseWeights.bilateral_g_stddev,
                                pairwiseWeights.bilateral_b_stddev,
                                image,
                                new PottsCompatibility(pairwiseWeights.bilateral_weight),
                                kerneltype,
                                normalizationtype);
-          
+
       // Do map inference
       VectorXs map = crf.map(iterations);
 
@@ -120,10 +120,10 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
       for (int i = 0; i < numVariables; i++ ) {
            result(i) = (double)map[i];
       }
-      
+
       energy(0) = crf.energy(map);
       bound(0) = lowestUnaryCost( unary_array, M,N,numberOfLabels );
-      
+
       return;
     }
 
@@ -138,42 +138,42 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
       for (int x = 0; x < M; x++) {
       for (int y = 0; y < N; y++) {
       for (int l = 0; l < numberOfLabels; l++) {
-        Q(x,y,l) = exp(-unaryCost(x,y,l)); 
+        Q(x,y,l) = exp(-unaryCost(x,y,l));
       }}}
-     
+
       normalize(Q);
 
       for (int i = 0; i < iterations; i++)
-      {           
+      {
         // Pairwise count negative when equal (faster)
         for (int label = 0; label < numberOfLabels; label++) {
           for (int x = 0; x < M; x++) {
           for (int y = 0; y < N; y++) {
 
-            addative_sum(x,y,label) = unaryCost(x,y,label); 
+            addative_sum(x,y,label) = unaryCost(x,y,label);
 
             for (int x_target = 0; x_target < M; x_target++) {
             for (int y_target = 0; y_target < N; y_target++) {
-              
+
               addative_sum(x,y,label) -=
                 pairwiseCost(x, y, x_target, y_target)*
                 Q( x_target, y_target, label );
             }
             }
           }
-          }      
+          }
         }
 
         for (int i = 0; i < Q.numel(); i++)
           Q(i) = exp( - addative_sum(i) );
 
         normalize(Q);
-      } 
+      }
 
       matrix<double> result(M,N);
       matrix<double> energy(1);
       matrix<double> bound(1);
-     
+
       double max_prob;
       for (int x = 0; x < M; x++) {
       for (int y = 0; y < N; y++) {
@@ -185,23 +185,19 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
           if (Q(x,y,l) > max_prob)
           {
             max_prob = Q(x,y,l);
-            result(x,y) = l;  
+            result(x,y) = l;
           }
         }
-      } 
+      }
       }
 
       energy(0) = std::numeric_limits<double>::quiet_NaN();
       bound(0) = std::numeric_limits<double>::quiet_NaN();
 
-      plhs[0] = result;
-      plhs[1] = energy;
-      plhs[2] = bound; 
-
       return;
     }
 
-    if(!solver.compare("trws")) 
+    if(!solver.compare("trws"))
     {
 
       if (debug)
@@ -220,21 +216,21 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
 
       std::vector<TypePotts::REAL> D(numberOfLabels);
 
-      for (int i = 0; i < numVariables; i++) 
+      for (int i = 0; i < numVariables; i++)
       {
-        for(int s = 0; s < numberOfLabels; ++s) 
-        {          
+        for(int s = 0; s < numberOfLabels; ++s)
+        {
           std::pair<int,int> p = linear2sub(i);
           D[s] = unaryCost( p, s );
         }
 
-        nodes[i] = mrf->AddNode(TypePotts::LocalSize(), 
+        nodes[i] = mrf->AddNode(TypePotts::LocalSize(),
                                 TypePotts::NodeData(&D[0]));
       }
 
-      // Pairwise cost 
+      // Pairwise cost
       for (int i = 0; i < numVariables; i++) {
-      for (int j = i+1; j < numVariables; j++) {  
+      for (int j = i+1; j < numVariables; j++) {
         std::pair<int,int> p0 = linear2sub(i);
         std::pair<int,int> p1 = linear2sub(j);
 
