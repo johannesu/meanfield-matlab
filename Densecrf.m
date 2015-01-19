@@ -68,6 +68,7 @@ classdef Densecrf < handle
 		lower_bound = -inf;
 		energy = nan;
 		energy_gap;
+		optimization_time = -1;
 	end
 	
 	properties (Hidden)
@@ -197,7 +198,10 @@ classdef Densecrf < handle
 			settings.solver = 'mean_field_explicit';
 			self.compile('densecrf');
 			
+			t = tic
 			segmentation =  densecrf_mex(self.im_stacked, self.unary_stacked, self.image_size, settings);
+			self.optimization_time = toc(t);
+
 			segmentation = segmentation+1;
 			
 			self.segmentation = segmentation;
@@ -205,7 +209,9 @@ classdef Densecrf < handle
 		end
 
 		function segmentation = threshold(self)
+			t = tic;
 			[~,segmentation] = min(self.unary,[],3);
+			self.optimization_time = toc(t);
 			self.segmentation = segmentation;
 			self.solver = 'threshold';
 		end
@@ -215,8 +221,10 @@ classdef Densecrf < handle
 			settings.solver = 'mean_field';
 			self.compile('densecrf');
 			
+			t = tic;
 			[segmentation, energy, bound] =  densecrf_mex(self.im_stacked, self.unary_stacked, self.image_size, settings);
-			
+			self.optimization_time = toc(t);
+
 			segmentation = segmentation+1;
 
 			tmp = self.get_energy;
@@ -225,16 +233,19 @@ classdef Densecrf < handle
 			self.get_energy = tmp;
 			self.energy = energy;
 			self.lower_bound = bound;
+		
 			self.solver = 'mean field';
 		end
 
-		function [segmentation, energy, bound] = trws(self)
+		function [segmentation, energy, lower_bound] = trws(self)
 			settings = self.gather_settings;
 			settings.solver = 'trws';
 			self.compile('densecrf');
 			
+			t = tic;
 			[segmentation, energy, lower_bound] =  densecrf_mex(self.im_stacked, self.unary_stacked, self.image_size, settings);
-			
+			self.optimization_time = toc(t);
+
 			segmentation = segmentation+1;
 			self.segmentation = segmentation;
 			self.lower_bound = lower_bound;
