@@ -14,7 +14,7 @@ Included solvers
 * Mean field approximation, using approximate filtering [2].
 * Mean field approximation, performing all summations explicitly (slow). 
 * TRWS-S [3].
-* Graph cuts for [4] 2 label problems.
+* Graph cuts for 2 label problems [4].
 
 
 References
