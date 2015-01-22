@@ -26,9 +26,9 @@
 */
 #pragma once
 #include <Eigen/Core>
-using namespace Eigen;
 
-typedef Matrix<short,Dynamic,1> VectorXs;
+
+typedef Eigen::Matrix<short,Eigen::Dynamic,1> VectorXs;
 
 /**** Learning Objective ****/
 class ObjectiveFunction {
@@ -37,7 +37,7 @@ public:
 	// Evaluate an objective function L(Q) and its gradient \nabla L(Q)
 	// Return the objetive value L(Q) and set gradient[i*M+l] to Q_i(l)*\partial L / \partial Q_i(l)
 	// We use the scales gradient here for numerical reasons!
-	virtual double evaluate( MatrixXf & d_mul_Q, const MatrixXf & Q ) const = 0;
+	virtual double evaluate( Eigen::MatrixXf & d_mul_Q, const Eigen::MatrixXf & Q ) const = 0;
 };
 // Log likelihood objective
 class LogLikelihood: public ObjectiveFunction {
@@ -48,20 +48,20 @@ public:
 	// Give a ground_truth labeling of size N, optional use a robustness term robust>0
 	LogLikelihood( const VectorXs & gt, float robust=0 );
 	// The objective value is sum_i log( Q_i( ground_truth_i ) + robust )
-	virtual double evaluate( MatrixXf & d_mul_Q, const MatrixXf & Q ) const;
+	virtual double evaluate( Eigen::MatrixXf & d_mul_Q, const Eigen::MatrixXf & Q ) const;
 };
 // Log likelihood objective
 class Hamming: public ObjectiveFunction {
 protected:
 	VectorXs gt_;
-	VectorXf class_weight_;
+	Eigen::VectorXf class_weight_;
 public:
 	// Give a ground_truth labeling of size N, reweight classes to cope with an invariance
 	// weight by w_c = pow( #labels_c, -class_weight_pow )
 	Hamming( const VectorXs & gt, float class_weight_pow=0 );
-	Hamming( const VectorXs & gt, const VectorXf & class_weight );
+	Hamming( const VectorXs & gt, const Eigen::VectorXf & class_weight );
 	// The objective value is sum_i Q_i( ground_truth_i )
-	virtual double evaluate( MatrixXf & d_mul_Q, const MatrixXf & Q ) const;
+	virtual double evaluate( Eigen::MatrixXf & d_mul_Q, const Eigen::MatrixXf & Q ) const;
 };
 // Intersection over union objective
 class IntersectionOverUnion: public ObjectiveFunction {
@@ -71,5 +71,5 @@ public:
 	// Give a ground_truth labeling of size N
 	IntersectionOverUnion( const VectorXs & gt );
 	// The objective value is sum_l ( sum_i [ground_truth_i == l] Q_i( l ) ) / ( |ground_truth_i == l| + sum_i [ground_truth_i != l] Q_i( l ) )
-	virtual double evaluate( MatrixXf & d_mul_Q, const MatrixXf & Q ) const;
+	virtual double evaluate( Eigen::MatrixXf & d_mul_Q, const Eigen::MatrixXf & Q ) const;
 };

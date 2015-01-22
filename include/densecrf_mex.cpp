@@ -82,14 +82,13 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
     EnergyFunctor energyFunctor(unaryCost, pairwiseCost, M,N, numberOfLabels);
 
     // Mean field
-    if(!solver.compare("mean_field"))
-    {
+    if(!solver.compare("mean_field"))  {
       if (debug)
         endTime("Solving using mean field approximation and approximate gaussian filters.");
 
       // Setup the CRF model
       extendedDenseCRF2D crf(M,N,numberOfLabels);
-      Map<MatrixXf> unary(unary_array, numberOfLabels, numVariables);
+      Eigen::Map<Eigen::MatrixXf> unary(unary_array, numberOfLabels, numVariables);
 
       crf.setUnaryEnergy( unary );
 

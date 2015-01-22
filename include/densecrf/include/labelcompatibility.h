@@ -26,7 +26,6 @@
 */
 #pragma once
 #include <Eigen/Core>
-using namespace Eigen;
 
 /**** LabelCompatibility models a function \mu(a,b) ****/
 // To create your own label compatibility implement an "apply" function
@@ -36,15 +35,15 @@ using namespace Eigen;
 class LabelCompatibility {
 public:
 	virtual ~LabelCompatibility();
-	virtual void apply( MatrixXf & out, const MatrixXf & Q ) const = 0;
+	virtual void apply( Eigen::MatrixXf & out, const Eigen::MatrixXf & Q ) const = 0;
 	// For non-symmetric pairwise potentials we would need to use the transpose of the pairwise term
 	// for parameter learning
-	virtual void applyTranspose( MatrixXf & out, const MatrixXf & Q ) const;
+	virtual void applyTranspose( Eigen::MatrixXf & out, const Eigen::MatrixXf & Q ) const;
 	
 	// Training and parameters
-	virtual VectorXf parameters() const;
-	virtual void setParameters( const VectorXf & v );
-	virtual VectorXf gradient( const MatrixXf & b, const MatrixXf & Q ) const;
+	virtual Eigen::VectorXf parameters() const;
+	virtual void setParameters( const Eigen::VectorXf & v );
+	virtual Eigen::VectorXf gradient( const Eigen::MatrixXf & b, const Eigen::MatrixXf & Q ) const;
 };
 /**** Implements potts \mu(a,b) = -w[a==b] ****/
 class PottsCompatibility: public LabelCompatibility {
@@ -52,37 +51,37 @@ protected:
 	float w_;
 public:
 	PottsCompatibility( float weight=1.0 );
-	virtual void apply( MatrixXf & out_values, const MatrixXf & in_values ) const;
+	virtual void apply( Eigen::MatrixXf & out_values, const Eigen::MatrixXf & in_values ) const;
 	
 	// Training and parameters
-	virtual VectorXf parameters() const;
-	virtual void setParameters( const VectorXf & v );
-	virtual VectorXf gradient( const MatrixXf & b, const MatrixXf & Q ) const;
+	virtual Eigen::VectorXf parameters() const;
+	virtual void setParameters( const Eigen::VectorXf & v );
+	virtual Eigen::VectorXf gradient( const Eigen::MatrixXf & b, const Eigen::MatrixXf & Q ) const;
 };
 /**** Implements diagonal \mu(a,b) = -[a==b]v(a) ****/
 class DiagonalCompatibility: public LabelCompatibility {
 protected:
-	VectorXf w_;
+	Eigen::VectorXf w_;
 public:
-	DiagonalCompatibility( const VectorXf & v );
-	virtual void apply( MatrixXf & out_values, const MatrixXf & in_values ) const;
+	DiagonalCompatibility( const Eigen::VectorXf & v );
+	virtual void apply( Eigen::MatrixXf & out_values, const Eigen::MatrixXf & in_values ) const;
 	
 	// Training and parameters
-	virtual VectorXf parameters() const;
-	virtual void setParameters( const VectorXf & v );
-	virtual VectorXf gradient( const MatrixXf & b, const MatrixXf & Q ) const;
+	virtual Eigen::VectorXf parameters() const;
+	virtual void setParameters( const Eigen::VectorXf & v );
+	virtual Eigen::VectorXf gradient( const Eigen::MatrixXf & b, const Eigen::MatrixXf & Q ) const;
 };
 /**** Implements matrix \mu(a,b) [enforces symmetry, but not positive definitness] ****/
 class MatrixCompatibility: public LabelCompatibility {
 protected:
-	MatrixXf w_;
+	Eigen::MatrixXf w_;
 public:
-	MatrixCompatibility( const MatrixXf & m );
-	virtual void apply( MatrixXf & out_values, const MatrixXf & in_values ) const;
-	virtual void applyTranspose( MatrixXf & out_values, const MatrixXf & in_values ) const;
+	MatrixCompatibility( const Eigen::MatrixXf & m );
+	virtual void apply( Eigen::MatrixXf & out_values, const Eigen::MatrixXf & in_values ) const;
+	virtual void applyTranspose( Eigen::MatrixXf & out_values, const Eigen::MatrixXf & in_values ) const;
 	
 	// Training and parameters
-	virtual VectorXf parameters() const;
-	virtual void setParameters( const VectorXf & v );
-	virtual VectorXf gradient( const MatrixXf & b, const MatrixXf & Q ) const;
+	virtual Eigen::VectorXf parameters() const;
+	virtual void setParameters( const Eigen::VectorXf & v );
+	virtual Eigen::VectorXf gradient( const Eigen::MatrixXf & b, const Eigen::MatrixXf & Q ) const;
 };

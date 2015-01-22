@@ -29,40 +29,40 @@
 
 UnaryEnergy::~UnaryEnergy() {
 }
-VectorXf UnaryEnergy::parameters() const {
-	return VectorXf();
+Eigen::VectorXf UnaryEnergy::parameters() const {
+	return Eigen::VectorXf();
 }
-void UnaryEnergy::setParameters( const VectorXf & v ) {
+void UnaryEnergy::setParameters( const Eigen::VectorXf & v ) {
 }
-VectorXf UnaryEnergy::gradient( const MatrixXf & b ) const {
-	return VectorXf();
+Eigen::VectorXf UnaryEnergy::gradient( const Eigen::MatrixXf & b ) const {
+	return Eigen::VectorXf();
 }
 
 
-ConstUnaryEnergy::ConstUnaryEnergy( const MatrixXf & u ):unary_(u) {
+ConstUnaryEnergy::ConstUnaryEnergy( const Eigen::MatrixXf & u ):unary_(u) {
 }
-MatrixXf ConstUnaryEnergy::get() const {
+Eigen::MatrixXf ConstUnaryEnergy::get() const {
 	return unary_;
 }
 
-LogisticUnaryEnergy::LogisticUnaryEnergy( const MatrixXf & L, const MatrixXf & f ):L_(L),f_(f) {
+LogisticUnaryEnergy::LogisticUnaryEnergy( const Eigen::MatrixXf & L, const Eigen::MatrixXf & f ):L_(L),f_(f) {
 }
-MatrixXf LogisticUnaryEnergy::get() const {
+Eigen::MatrixXf LogisticUnaryEnergy::get() const {
 	return L_*f_;
 }
-VectorXf LogisticUnaryEnergy::parameters() const {
-	MatrixXf l = L_;
+Eigen::VectorXf LogisticUnaryEnergy::parameters() const {
+	Eigen::MatrixXf l = L_;
 	l.resize( l.cols()*l.rows(), 1 );
 	return l;
 }
-void LogisticUnaryEnergy::setParameters( const VectorXf & v ) {
+void LogisticUnaryEnergy::setParameters( const Eigen::VectorXf & v ) {
 	assert( v.rows() == L_.cols()*L_.rows() );
-	MatrixXf l = v;
+	Eigen::MatrixXf l = v;
 	l.resizeLike( L_ );
 	L_ = l;
 }
-VectorXf LogisticUnaryEnergy::gradient( const MatrixXf & b ) const {
-	MatrixXf g = b*f_.transpose();
+Eigen::VectorXf LogisticUnaryEnergy::gradient( const Eigen::MatrixXf & b ) const {
+	Eigen::MatrixXf g = b*f_.transpose();
 	g.resize( g.cols()*g.rows(), 1 );
 	return g;
 }

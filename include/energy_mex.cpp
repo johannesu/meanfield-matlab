@@ -43,7 +43,7 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
   const bool calculate_exact_energy = params.get<bool>("calculate_exact_energy", false);
 
   extendedDenseCRF2D crf(M,N,numberOfLabels);
-  Map<MatrixXf> unary(unary_array, numberOfLabels, numVariables);
+  Eigen::Map<Eigen::MatrixXf> unary(unary_array, numberOfLabels, numVariables);
 
   crf.setUnaryEnergy( unary );
 
@@ -84,7 +84,7 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
   }
 
   matrix<double> mf_energy(1);
-  Map<VectorXs> map_eigen(map, numVariables);
+  Eigen::Map<VectorXs> map_eigen(map, numVariables);
   mf_energy(0) = crf.energy(map_eigen);
     
   plhs[0] = energy;

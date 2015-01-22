@@ -137,7 +137,7 @@ public:
 Permutohedral::Permutohedral():N_( 0 ), M_( 0 ), d_( 0 ) {
 }
 #ifdef SSE_PERMUTOHEDRAL
-void Permutohedral::init ( const MatrixXf & feature )
+void Permutohedral::init ( const Eigen::MatrixXf & feature )
 {
 	// Compute the lattice coordinates for each feature [there is going to be a lot of magic here
 	N_ = feature.cols();
@@ -320,7 +320,7 @@ void Permutohedral::init ( const MatrixXf & feature )
 	delete[] n2;
 }
 #else
-void Permutohedral::init ( const MatrixXf & feature )
+void Permutohedral::init ( const Eigen::MatrixXf & feature )
 {
 	// Compute the lattice coordinates for each feature [there is going to be a lot of magic here
 	N_ = feature.cols();
@@ -593,7 +593,7 @@ void Permutohedral::sseCompute ( float* out, const float* in, int value_size, bo
 	seqCompute( out, in, value_size, reverse );
 }
 #endif
-void Permutohedral::compute ( MatrixXf & out, const MatrixXf & in, bool reverse ) const
+void Permutohedral::compute ( Eigen::MatrixXf & out, const Eigen::MatrixXf & in, bool reverse ) const
 {
 	if( out.cols() != in.cols() || out.rows() != in.rows() )
 		out = 0*in;
@@ -602,9 +602,9 @@ void Permutohedral::compute ( MatrixXf & out, const MatrixXf & in, bool reverse 
 	else
 		sseCompute( out.data(), in.data(), in.rows(), reverse );
 }
-MatrixXf Permutohedral::compute ( const MatrixXf & in, bool reverse ) const
+Eigen::MatrixXf Permutohedral::compute ( const Eigen::MatrixXf & in, bool reverse ) const
 {
-	MatrixXf r;
+	Eigen::MatrixXf r;
 	compute( r, in, reverse );
 	return r;
 }

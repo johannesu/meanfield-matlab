@@ -39,7 +39,7 @@ static lbfgsfloatval_t evaluate(
 {
 	EnergyFunction * efun = static_cast<EnergyFunction*>( instance );
 	
-	VectorXf vx( n ), vg( n );
+	Eigen::VectorXf vx( n ), vg( n );
 	std::copy( x, x+n, vx.data() );
 	lbfgsfloatval_t r = efun->gradient( vx, vg );
 	
@@ -65,8 +65,8 @@ static int progress(
     printf("\n");
     return 0;
 }
-VectorXf minimizeLBFGS( EnergyFunction & efun, int restart, bool verbose ) {
-	VectorXf x0 = efun.initialValue();
+Eigen::VectorXf minimizeLBFGS( EnergyFunction & efun, int restart, bool verbose ) {
+	Eigen::VectorXf x0 = efun.initialValue();
 	const int n = x0.rows();
 	
 	lbfgsfloatval_t *x = lbfgs_malloc(n);
@@ -101,10 +101,10 @@ VectorXf minimizeLBFGS( EnergyFunction & efun, int restart, bool verbose ) {
 	lbfgs_free(x);
 	return x0;
 }
-VectorXf numericGradient( EnergyFunction & efun, const VectorXf & x, float EPS ) {
-	VectorXf g( x.rows() ), tmp;
+Eigen::VectorXf numericGradient( EnergyFunction & efun, const Eigen::VectorXf & x, float EPS ) {
+	Eigen::VectorXf g( x.rows() ), tmp;
 	for( int i=0; i<x.rows(); i++ ) {
-		VectorXf xx = x;
+		Eigen::VectorXf xx = x;
 		xx[i] = x[i]+EPS;
 		double v1 = efun.gradient( xx, tmp );
 		xx[i] = x[i]-EPS;
@@ -113,21 +113,21 @@ VectorXf numericGradient( EnergyFunction & efun, const VectorXf & x, float EPS )
 	}
 	return g;
 }
-VectorXf gradient( EnergyFunction & efun, const VectorXf & x ) {
-	VectorXf r( x.rows() );
+Eigen::VectorXf gradient( EnergyFunction & efun, const Eigen::VectorXf & x ) {
+	Eigen::VectorXf r( x.rows() );
 	efun.gradient( x, r );
 	return r;
 }
-double gradCheck( EnergyFunction & efun, const VectorXf & x, float EPS ) {
-	VectorXf ng = numericGradient( efun, x, EPS );
-	VectorXf g( x.rows() );
+double gradCheck( EnergyFunction & efun, const Eigen::VectorXf & x, float EPS ) {
+	Eigen::VectorXf ng = numericGradient( efun, x, EPS );
+	Eigen::VectorXf g( x.rows() );
 	efun.gradient( x, g );
 	return (ng-g).norm();
 }
 
-VectorXf computeFunction( EnergyFunction & efun, const VectorXf & x, const VectorXf & dx, int n_samples ) {
-	VectorXf r( n_samples );
-	VectorXf tmp = x;
+Eigen::VectorXf computeFunction( EnergyFunction & efun, const Eigen::VectorXf & x, const Eigen::VectorXf & dx, int n_samples ) {
+	Eigen::VectorXf r( n_samples );
+	Eigen::VectorXf tmp = x;
 	for( int i=0; i<n_samples; i++ )
 		r[i] = efun.gradient( x+i*dx, tmp );
 	return r;

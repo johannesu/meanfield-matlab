@@ -44,11 +44,11 @@ enum KernelType {
 class Kernel {
 public:
 	virtual ~Kernel();
-	virtual void apply( MatrixXf & out, const MatrixXf & Q ) const = 0;
-	virtual void applyTranspose( MatrixXf & out, const MatrixXf & Q ) const = 0;
-	virtual VectorXf parameters() const = 0;
-	virtual void setParameters( const VectorXf & p ) = 0;
-	virtual VectorXf gradient( const MatrixXf & b, const MatrixXf & Q ) const = 0;
+	virtual void apply( Eigen::MatrixXf & out, const Eigen::MatrixXf & Q ) const = 0;
+	virtual void applyTranspose( Eigen::MatrixXf & out, const Eigen::MatrixXf & Q ) const = 0;
+	virtual Eigen::VectorXf parameters() const = 0;
+	virtual void setParameters( const Eigen::VectorXf & p ) = 0;
+	virtual Eigen::VectorXf gradient( const Eigen::MatrixXf & b, const Eigen::MatrixXf & Q ) const = 0;
 };
 
 class PairwisePotential{
@@ -56,18 +56,18 @@ protected:
 	LabelCompatibility * compatibility_;
 	Kernel * kernel_;
 	PairwisePotential( const PairwisePotential &o ){}
-	void filter( MatrixXf & out, const MatrixXf & in, bool transpose=false ) const;
+	void filter( Eigen::MatrixXf & out, const Eigen::MatrixXf & in, bool transpose=false ) const;
 public:
 	virtual ~PairwisePotential();
-	PairwisePotential(const MatrixXf & features, LabelCompatibility * compatibility, KernelType ktype=CONST_KERNEL, NormalizationType ntype=NORMALIZE_SYMMETRIC);
-	void apply(MatrixXf & out, const MatrixXf & Q) const;
-	void applyTranspose(MatrixXf & out, const MatrixXf & Q) const;
+	PairwisePotential(const Eigen::MatrixXf & features, LabelCompatibility * compatibility, KernelType ktype=CONST_KERNEL, NormalizationType ntype=NORMALIZE_SYMMETRIC);
+	void apply(Eigen::MatrixXf & out, const Eigen::MatrixXf & Q) const;
+	void applyTranspose(Eigen::MatrixXf & out, const Eigen::MatrixXf & Q) const;
 	
 	// Get the parameters
-	virtual VectorXf parameters() const;
-	virtual VectorXf kernelParameters() const;
-	virtual void setParameters( const VectorXf & v );
-	virtual void setKernelParameters( const VectorXf & v );
-	virtual VectorXf gradient( const MatrixXf & b, const MatrixXf & Q ) const;
-	virtual VectorXf kernelGradient( const MatrixXf & b, const MatrixXf & Q ) const;
+	virtual Eigen::VectorXf parameters() const;
+	virtual Eigen::VectorXf kernelParameters() const;
+	virtual void setParameters( const Eigen::VectorXf & v );
+	virtual void setKernelParameters( const Eigen::VectorXf & v );
+	virtual Eigen::VectorXf gradient( const Eigen::MatrixXf & b, const Eigen::MatrixXf & Q ) const;
+	virtual Eigen::VectorXf kernelGradient( const Eigen::MatrixXf & b, const Eigen::MatrixXf & Q ) const;
 };

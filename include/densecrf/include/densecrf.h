@@ -56,7 +56,7 @@ public:
 	// The kernel shape should be captured by transforming the
 	// features before passing them into this function
 	// (ownership of LabelCompatibility will be transfered to this class)
-	void addPairwiseEnergy( const MatrixXf & features, LabelCompatibility * function, KernelType kernel_type=DIAG_KERNEL, NormalizationType normalization_type=NORMALIZE_SYMMETRIC );
+	void addPairwiseEnergy( const Eigen::MatrixXf & features, LabelCompatibility * function, KernelType kernel_type=DIAG_KERNEL, NormalizationType normalization_type=NORMALIZE_SYMMETRIC );
 	
 	// Add your own favorite pairwise potential (ownership will be transfered to this class)
 	void addPairwiseEnergy( PairwisePotential* potential );
@@ -64,42 +64,42 @@ public:
 	// Set the unary potential (ownership will be transfered to this class)
 	void setUnaryEnergy( UnaryEnergy * unary );
 	// Add a constant unary term
-	void setUnaryEnergy( const MatrixXf & unary );
+	void setUnaryEnergy( const Eigen::MatrixXf & unary );
 	// Add a logistic unary term
-	void setUnaryEnergy( const MatrixXf & L, const MatrixXf & f );
+	void setUnaryEnergy( const Eigen::MatrixXf & L, const Eigen::MatrixXf & f );
 	
 	// Run inference and return the probabilities
-	MatrixXf inference( int n_iterations ) const;
+	Eigen::MatrixXf inference( int n_iterations ) const;
 	
 	// Run MAP inference and return the map for each pixel
 	VectorXs map( int n_iterations ) const;
 	
 	// Step by step inference
-	MatrixXf startInference() const;
-	void stepInference( MatrixXf & Q, MatrixXf & tmp1, MatrixXf & tmp2 ) const;
-	VectorXs currentMap( const MatrixXf & Q ) const;
+	Eigen::MatrixXf startInference() const;
+	void stepInference( Eigen::MatrixXf & Q, Eigen::MatrixXf & tmp1, Eigen::MatrixXf & tmp2 ) const;
+	VectorXs currentMap( const Eigen::MatrixXf & Q ) const;
 	
 	// Learning functions
 	// Compute the gradient of the objective function over mean-field marginals with
 	// respect to the model parameters
-	double gradient( int n_iterations, const ObjectiveFunction & objective, VectorXf * unary_grad, VectorXf * lbl_cmp_grad, VectorXf * kernel_grad=NULL ) const;
+	double gradient( int n_iterations, const ObjectiveFunction & objective, Eigen::VectorXf * unary_grad, Eigen::VectorXf * lbl_cmp_grad, Eigen::VectorXf * kernel_grad=NULL ) const;
 public: /* Debugging functions */
 	// Compute the unary energy of an assignment l
-	VectorXf unaryEnergy( const VectorXs & l );
+	Eigen::VectorXf unaryEnergy( const VectorXs & l );
 	
 	// Compute the pairwise energy of an assignment l (half of each pairwise potential is added to each of it's endpoints)
-	VectorXf pairwiseEnergy( const VectorXs & l, int term=-1 );
+	Eigen::VectorXf pairwiseEnergy( const VectorXs & l, int term=-1 );
 	
 	// Compute the KL-divergence of a set of marginals
-	double klDivergence( const MatrixXf & Q ) const;
+	double klDivergence( const Eigen::MatrixXf & Q ) const;
 
 public: /* Parameters */
-	VectorXf unaryParameters() const;
-	void setUnaryParameters( const VectorXf & v );
-	VectorXf labelCompatibilityParameters() const;
-	void setLabelCompatibilityParameters( const VectorXf & v );
-	VectorXf kernelParameters() const;
-	void setKernelParameters( const VectorXf & v );
+	Eigen::VectorXf unaryParameters() const;
+	void setUnaryParameters( const Eigen::VectorXf & v );
+	Eigen::VectorXf labelCompatibilityParameters() const;
+	void setLabelCompatibilityParameters( const Eigen::VectorXf & v );
+	Eigen::VectorXf kernelParameters() const;
+	void setKernelParameters( const Eigen::VectorXf & v );
 };
 
 class DenseCRF2D:public DenseCRF{

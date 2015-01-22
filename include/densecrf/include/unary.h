@@ -26,32 +26,31 @@
 */
 #pragma once
 #include <Eigen/Core>
-using namespace Eigen;
 
 class UnaryEnergy {
 public:
 	virtual ~UnaryEnergy();
 	// Set the unary
-	virtual MatrixXf get( ) const = 0;
+	virtual Eigen::MatrixXf get( ) const = 0;
 	// Gradient computation
-	virtual VectorXf parameters() const;
-	virtual void setParameters( const VectorXf & v );
-	virtual VectorXf gradient( const MatrixXf & b ) const;
+	virtual Eigen::VectorXf parameters() const;
+	virtual void setParameters( const Eigen::VectorXf & v );
+	virtual Eigen::VectorXf gradient( const Eigen::MatrixXf & b ) const;
 };
 class ConstUnaryEnergy: public UnaryEnergy {
 protected:
-	MatrixXf unary_;
+	Eigen::MatrixXf unary_;
 public:
-	ConstUnaryEnergy( const MatrixXf & unary );
-	virtual MatrixXf get( ) const;
+	ConstUnaryEnergy( const Eigen::MatrixXf & unary );
+	virtual Eigen::MatrixXf get( ) const;
 };
 class LogisticUnaryEnergy: public UnaryEnergy {
 protected:
-	MatrixXf L_, f_;
+	Eigen::MatrixXf L_, f_;
 public:
-	LogisticUnaryEnergy( const MatrixXf & L, const MatrixXf & feature );
-	virtual MatrixXf get( ) const;
-	virtual VectorXf parameters() const;
-	virtual void setParameters( const VectorXf & v );
-	virtual VectorXf gradient( const MatrixXf & b ) const;
+	LogisticUnaryEnergy( const Eigen::MatrixXf & L, const Eigen::MatrixXf & feature );
+	virtual Eigen::MatrixXf get( ) const;
+	virtual Eigen::VectorXf parameters() const;
+	virtual void setParameters( const Eigen::VectorXf & v );
+	virtual Eigen::VectorXf gradient( const Eigen::MatrixXf & b ) const;
 };

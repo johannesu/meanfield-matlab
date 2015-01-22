@@ -26,15 +26,14 @@
 */
 #pragma once
 #include <Eigen/Core>
-using namespace Eigen;
 
 class EnergyFunction {
 public:
-	virtual VectorXf initialValue() = 0;
-	virtual double gradient( const VectorXf & x, VectorXf & dx ) = 0;
+	virtual Eigen::VectorXf initialValue() = 0;
+	virtual double gradient( const Eigen::VectorXf & x, Eigen::VectorXf & dx ) = 0;
 };
-VectorXf minimizeLBFGS( EnergyFunction & efun, int restart=0, bool verbose=false );
-VectorXf numericGradient( EnergyFunction & efun, const VectorXf & x, float EPS=1e-3 );
-VectorXf gradient( EnergyFunction & efun, const VectorXf & x );
-double gradCheck( EnergyFunction & efun, const VectorXf & x, float EPS=1e-3 );
-VectorXf computeFunction( EnergyFunction & efun, const VectorXf & x, const VectorXf & dx, int n_samples = 100 );
+Eigen::VectorXf minimizeLBFGS( EnergyFunction & efun, int restart=0, bool verbose=false );
+Eigen::VectorXf numericGradient( EnergyFunction & efun, const Eigen::VectorXf & x, float EPS=1e-3 );
+Eigen::VectorXf gradient( EnergyFunction & efun, const Eigen::VectorXf & x );
+double gradCheck( EnergyFunction & efun, const Eigen::VectorXf & x, float EPS=1e-3 );
+Eigen::VectorXf computeFunction( EnergyFunction & efun, const Eigen::VectorXf & x, const Eigen::VectorXf & dx, int n_samples = 100 );

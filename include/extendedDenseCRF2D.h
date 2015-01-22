@@ -5,7 +5,7 @@
 #include "densecrf/include/densecrf.h"
 
 // Missing in densecrf.h
-void expAndNormalize ( MatrixXf & out, const MatrixXf & in );
+void expAndNormalize ( Eigen::MatrixXf & out, const Eigen::MatrixXf & in );
 
 class extendedDenseCRF2D : public DenseCRF2D
 {
@@ -15,8 +15,8 @@ public:
 
   double energy(VectorXs map)
   {
-    VectorXf unary = unaryEnergy( map );
-    VectorXf pairwise = pairwiseEnergy( map );
+    Eigen::VectorXf unary = unaryEnergy( map );
+    Eigen::VectorXf pairwise = pairwiseEnergy( map );
 
     double energy = 0;
 

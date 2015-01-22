@@ -34,14 +34,14 @@ protected:
 	NormalizationType ntype_;
 	KernelType ktype_;
 	Permutohedral lattice_;
-	VectorXf norm_;
-	MatrixXf f_;
-	MatrixXf parameters_;
-	void initLattice( const MatrixXf & f ) {
+	Eigen::VectorXf norm_;
+	Eigen::MatrixXf f_;
+	Eigen::MatrixXf parameters_;
+	void initLattice( const Eigen::MatrixXf & f ) {
 		const int N = f.cols();
 		lattice_.init( f );
 		
-		norm_ = lattice_.compute( VectorXf::Ones( N ).transpose() ).transpose();
+		norm_ = lattice_.compute( Eigen::VectorXf::Ones( N ).transpose() ).transpose();
 		
 		if ( ntype_ == NO_NORMALIZATION ) {
 			float mean_norm = 0;
@@ -60,7 +60,7 @@ protected:
 				norm_[i] = 1.0 / (norm_[i]+1e-20);
 		}
 	}
-	void filter( MatrixXf & out, const MatrixXf & in, bool transpose ) const {
+	void filter( Eigen::MatrixXf & out, const Eigen::MatrixXf & in, bool transpose ) const {
 		// Read in the values
 		if( ntype_ == NORMALIZE_SYMMETRIC || (ntype_ == NORMALIZE_BEFORE && !transpose) || (ntype_ == NORMALIZE_AFTER && transpose))
 			out = in*norm_.asDiagonal();
@@ -79,84 +79,84 @@ protected:
 			out = out*norm_.asDiagonal();
 	}
 	// Compute d/df a^T*K*b
-	MatrixXf kernelGradient( const MatrixXf & a, const MatrixXf & b ) const {
-		MatrixXf g = 0*f_;
+	Eigen::MatrixXf kernelGradient( const Eigen::MatrixXf & a, const Eigen::MatrixXf & b ) const {
+		Eigen::MatrixXf g = 0*f_;
 		lattice_.gradient( g.data(), a.data(), b.data(), a.rows() );
 		return g;
 	}
-	MatrixXf featureGradient( const MatrixXf & a, const MatrixXf & b ) const {
+	Eigen::MatrixXf featureGradient( const Eigen::MatrixXf & a, const Eigen::MatrixXf & b ) const {
 		if (ntype_ == NO_NORMALIZATION )
 			return kernelGradient( a, b );
 		else if (ntype_ == NORMALIZE_SYMMETRIC ) {
-			MatrixXf fa = lattice_.compute( a*norm_.asDiagonal(), true );
-			MatrixXf fb = lattice_.compute( b*norm_.asDiagonal() );
-			MatrixXf ones = MatrixXf::Ones( a.rows(), a.cols() );
-			VectorXf norm3 = norm_.array()*norm_.array()*norm_.array();
-			MatrixXf r = kernelGradient( 0.5*( a.array()*fb.array() + fa.array()*b.array() ).matrix()*norm3.asDiagonal(), ones );
+			Eigen::MatrixXf fa = lattice_.compute( a*norm_.asDiagonal(), true );
+			Eigen::MatrixXf fb = lattice_.compute( b*norm_.asDiagonal() );
+			Eigen::MatrixXf ones = Eigen::MatrixXf::Ones( a.rows(), a.cols() );
+			Eigen::VectorXf norm3 = norm_.array()*norm_.array()*norm_.array();
+			Eigen::MatrixXf r = kernelGradient( 0.5*( a.array()*fb.array() + fa.array()*b.array() ).matrix()*norm3.asDiagonal(), ones );
 			return - r + kernelGradient( a*norm_.asDiagonal(), b*norm_.asDiagonal() );
 		}
 		else if (ntype_ == NORMALIZE_AFTER ) {
-			MatrixXf fb = lattice_.compute( b );
+			Eigen::MatrixXf fb = lattice_.compute( b );
 			
-			MatrixXf ones = MatrixXf::Ones( a.rows(), a.cols() );
-			VectorXf norm2 = norm_.array()*norm_.array();
-			MatrixXf r = kernelGradient( ( a.array()*fb.array() ).matrix()*norm2.asDiagonal(), ones );
+			Eigen::MatrixXf ones = Eigen::MatrixXf::Ones( a.rows(), a.cols() );
+			Eigen::VectorXf norm2 = norm_.array()*norm_.array();
+			Eigen::MatrixXf r = kernelGradient( ( a.array()*fb.array() ).matrix()*norm2.asDiagonal(), ones );
 			return - r + kernelGradient( a*norm_.asDiagonal(), b );
 		}
 		else /*if (ntype_ == NORMALIZE_BEFORE )*/ {
-			MatrixXf fa = lattice_.compute( a, true );
+			Eigen::MatrixXf fa = lattice_.compute( a, true );
 			
-			MatrixXf ones = MatrixXf::Ones( a.rows(), a.cols() );
-			VectorXf norm2 = norm_.array()*norm_.array();
-			MatrixXf r = kernelGradient( ( fa.array()*b.array() ).matrix()*norm2.asDiagonal(), ones );
+			Eigen::MatrixXf ones = Eigen::MatrixXf::Ones( a.rows(), a.cols() );
+			Eigen::VectorXf norm2 = norm_.array()*norm_.array();
+			Eigen::MatrixXf r = kernelGradient( ( fa.array()*b.array() ).matrix()*norm2.asDiagonal(), ones );
 			return -r+kernelGradient( a, b*norm_.asDiagonal() );
 		}
 	}
 public:
-	DenseKernel(const MatrixXf & f, KernelType ktype, NormalizationType ntype):f_(f), ktype_(ktype), ntype_(ntype) {
+	DenseKernel(const Eigen::MatrixXf & f, KernelType ktype, NormalizationType ntype):f_(f), ktype_(ktype), ntype_(ntype) {
 		if (ktype_ == DIAG_KERNEL)
-			parameters_ = VectorXf::Ones( f.rows() );
+			parameters_ = Eigen::VectorXf::Ones( f.rows() );
 		else if( ktype == FULL_KERNEL )
-			parameters_ = MatrixXf::Identity( f.rows(), f.rows() );
+			parameters_ = Eigen::MatrixXf::Identity( f.rows(), f.rows() );
 		initLattice( f );
 	}
-	virtual void apply( MatrixXf & out, const MatrixXf & Q ) const {
+	virtual void apply( Eigen::MatrixXf & out, const Eigen::MatrixXf & Q ) const {
 		filter( out, Q, false );
 	}
-	virtual void applyTranspose( MatrixXf & out, const MatrixXf & Q ) const {
+	virtual void applyTranspose( Eigen::MatrixXf & out, const Eigen::MatrixXf & Q ) const {
 		filter( out, Q, true );
 	}
-	virtual VectorXf parameters() const {
+	virtual Eigen::VectorXf parameters() const {
 		if (ktype_ == CONST_KERNEL)
-			return VectorXf();
+			return Eigen::VectorXf();
 		else if (ktype_ == DIAG_KERNEL)
 			return parameters_;
 		else {
-			MatrixXf p = parameters_;
+			Eigen::MatrixXf p = parameters_;
 			p.resize( p.cols()*p.rows(), 1 );
 			return p;
 		}
 	}
-	virtual void setParameters( const VectorXf & p ) {
+	virtual void setParameters( const Eigen::VectorXf & p ) {
 		if (ktype_ == DIAG_KERNEL) {
 			parameters_ = p;
 			initLattice( p.asDiagonal() * f_ );
 		}
 		else if (ktype_ == FULL_KERNEL) {
-			MatrixXf tmp = p;
+			Eigen::MatrixXf tmp = p;
 			tmp.resize( parameters_.rows(), parameters_.cols() );
 			parameters_ = tmp;
 			initLattice( tmp * f_ );
 		}
 	}
-	virtual VectorXf gradient( const MatrixXf & a, const MatrixXf & b ) const {
+	virtual Eigen::VectorXf gradient( const Eigen::MatrixXf & a, const Eigen::MatrixXf & b ) const {
 		if (ktype_ == CONST_KERNEL)
-			return VectorXf();
-		MatrixXf fg = featureGradient( a, b );
+			return Eigen::VectorXf();
+		Eigen::MatrixXf fg = featureGradient( a, b );
 		if (ktype_ == DIAG_KERNEL)
 			return (f_.array()*fg.array()).rowwise().sum();
 		else {
-			MatrixXf p = fg*f_.transpose();
+			Eigen::MatrixXf p = fg*f_.transpose();
 			p.resize( p.cols()*p.rows(), 1 );
 			return p;
 		}
@@ -167,40 +167,40 @@ PairwisePotential::~PairwisePotential(){
 	delete compatibility_;
 	delete kernel_;
 }
-PairwisePotential::PairwisePotential(const MatrixXf & features, LabelCompatibility * compatibility, KernelType ktype, NormalizationType ntype) : compatibility_(compatibility) {
+PairwisePotential::PairwisePotential(const Eigen::MatrixXf & features, LabelCompatibility * compatibility, KernelType ktype, NormalizationType ntype) : compatibility_(compatibility) {
 	kernel_ = new DenseKernel( features, ktype, ntype );
 }
-void PairwisePotential::apply(MatrixXf & out, const MatrixXf & Q) const {
+void PairwisePotential::apply(Eigen::MatrixXf & out, const Eigen::MatrixXf & Q) const {
 	kernel_->apply( out, Q );
 	
 	// Apply the compatibility
 	compatibility_->apply( out, out );
 }
-void PairwisePotential::applyTranspose(MatrixXf & out, const MatrixXf & Q) const {
+void PairwisePotential::applyTranspose(Eigen::MatrixXf & out, const Eigen::MatrixXf & Q) const {
 	kernel_->applyTranspose( out, Q );
 	// Apply the compatibility
 	compatibility_->applyTranspose( out, out );
 }
-VectorXf PairwisePotential::parameters() const {
+Eigen::VectorXf PairwisePotential::parameters() const {
 	return compatibility_->parameters();
 }
-void PairwisePotential::setParameters( const VectorXf & v ) {
+void PairwisePotential::setParameters( const Eigen::VectorXf & v ) {
 	compatibility_->setParameters( v );
 }
-VectorXf PairwisePotential::gradient( const MatrixXf & b, const MatrixXf & Q ) const {
-	MatrixXf filtered_Q = 0*Q;
+Eigen::VectorXf PairwisePotential::gradient( const Eigen::MatrixXf & b, const Eigen::MatrixXf & Q ) const {
+	Eigen::MatrixXf filtered_Q = 0*Q;
 	// You could reuse the filtered_b from applyTranspose
 	kernel_->apply( filtered_Q, Q );
 	return compatibility_->gradient(b,filtered_Q);
 }
-VectorXf PairwisePotential::kernelParameters() const {
+Eigen::VectorXf PairwisePotential::kernelParameters() const {
 	return kernel_->parameters();
 }
-void PairwisePotential::setKernelParameters( const VectorXf & v ) {
+void PairwisePotential::setKernelParameters( const Eigen::VectorXf & v ) {
 	kernel_->setParameters( v );
 }
-VectorXf PairwisePotential::kernelGradient( const MatrixXf & b, const MatrixXf & Q ) const {
-	MatrixXf lbl_Q = 0*Q;
+Eigen::VectorXf PairwisePotential::kernelGradient( const Eigen::MatrixXf & b, const Eigen::MatrixXf & Q ) const {
+	Eigen::MatrixXf lbl_Q = 0*Q;
 	// You could reuse the filtered_b from applyTranspose
 	compatibility_->apply( lbl_Q, Q );
 	return kernel_->gradient(b,lbl_Q);

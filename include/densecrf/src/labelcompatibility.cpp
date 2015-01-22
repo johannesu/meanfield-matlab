@@ -28,79 +28,79 @@
 
 LabelCompatibility::~LabelCompatibility() {
 }
-void LabelCompatibility::applyTranspose( MatrixXf & out, const MatrixXf & Q ) const {
+void LabelCompatibility::applyTranspose( Eigen::MatrixXf & out, const Eigen::MatrixXf & Q ) const {
 	apply( out, Q );
 }
-VectorXf LabelCompatibility::parameters() const {
-	return VectorXf();
+Eigen::VectorXf LabelCompatibility::parameters() const {
+	return Eigen::VectorXf();
 }
-void LabelCompatibility::setParameters( const VectorXf & v ) {
+void LabelCompatibility::setParameters( const Eigen::VectorXf & v ) {
 }
-VectorXf LabelCompatibility::gradient( const MatrixXf & b, const MatrixXf & Q ) const {
-	return VectorXf();
+Eigen::VectorXf LabelCompatibility::gradient( const Eigen::MatrixXf & b, const Eigen::MatrixXf & Q ) const {
+	return Eigen::VectorXf();
 }
 
 
 PottsCompatibility::PottsCompatibility( float weight ): w_(weight) {
 }
-void PottsCompatibility::apply( MatrixXf & out, const MatrixXf & Q ) const {
+void PottsCompatibility::apply( Eigen::MatrixXf & out, const Eigen::MatrixXf & Q ) const {
 	out = -w_*Q;
 }
-VectorXf PottsCompatibility::parameters() const {
-	VectorXf r(1);
+Eigen::VectorXf PottsCompatibility::parameters() const {
+	Eigen::VectorXf r(1);
 	r[0] = w_;
 	return r;
 }
-void PottsCompatibility::setParameters( const VectorXf & v ) {
+void PottsCompatibility::setParameters( const Eigen::VectorXf & v ) {
 	w_ = v[0];
 }
-VectorXf PottsCompatibility::gradient( const MatrixXf & b, const MatrixXf & Q ) const {
-	VectorXf r(1);
+Eigen::VectorXf PottsCompatibility::gradient( const Eigen::MatrixXf & b, const Eigen::MatrixXf & Q ) const {
+	Eigen::VectorXf r(1);
 	r[0] = -(b.array()*Q.array()).sum();
 	return r;
 }
 
 
-DiagonalCompatibility::DiagonalCompatibility( const VectorXf & v ): w_(v) {
+DiagonalCompatibility::DiagonalCompatibility( const Eigen::VectorXf & v ): w_(v) {
 }
-void DiagonalCompatibility::apply( MatrixXf & out, const MatrixXf & Q ) const {
+void DiagonalCompatibility::apply( Eigen::MatrixXf & out, const Eigen::MatrixXf & Q ) const {
 	assert( w_.rows() == Q.rows() );
 	out = w_.asDiagonal()*Q;
 }
-VectorXf DiagonalCompatibility::parameters() const {
+Eigen::VectorXf DiagonalCompatibility::parameters() const {
 	return w_;
 }
-void DiagonalCompatibility::setParameters( const VectorXf & v ) {
+void DiagonalCompatibility::setParameters( const Eigen::VectorXf & v ) {
 	w_ = v;
 }
-VectorXf DiagonalCompatibility::gradient( const MatrixXf & b, const MatrixXf & Q ) const {
+Eigen::VectorXf DiagonalCompatibility::gradient( const Eigen::MatrixXf & b, const Eigen::MatrixXf & Q ) const {
 	return (b.array()*Q.array()).rowwise().sum();
 }
-MatrixCompatibility::MatrixCompatibility( const MatrixXf & m ): w_(0.5*(m + m.transpose())) {
+MatrixCompatibility::MatrixCompatibility( const Eigen::MatrixXf & m ): w_(0.5*(m + m.transpose())) {
 	assert( m.cols() == m.rows() );
 }
-void MatrixCompatibility::apply( MatrixXf & out, const MatrixXf & Q ) const {
+void MatrixCompatibility::apply( Eigen::MatrixXf & out, const Eigen::MatrixXf & Q ) const {
 	out = w_*Q;
 }
-void MatrixCompatibility::applyTranspose( MatrixXf & out, const MatrixXf & Q ) const {
+void MatrixCompatibility::applyTranspose( Eigen::MatrixXf & out, const Eigen::MatrixXf & Q ) const {
 	out = w_.transpose()*Q;
 }
-VectorXf MatrixCompatibility::parameters() const {
-	VectorXf r( w_.cols()*(w_.rows()+1)/2 );
+Eigen::VectorXf MatrixCompatibility::parameters() const {
+	Eigen::VectorXf r( w_.cols()*(w_.rows()+1)/2 );
 	for( int i=0,k=0; i<w_.cols(); i++ )
 		for( int j=i; j<w_.rows(); j++, k++ )
 			r[k] = w_(i,j);
 	return r;
 }
-void MatrixCompatibility::setParameters( const VectorXf & v ) {
+void MatrixCompatibility::setParameters( const Eigen::VectorXf & v ) {
 	assert( v.rows() == w_.cols()*(w_.rows()+1)/2 );
 	for( int i=0,k=0; i<w_.cols(); i++ )
 		for( int j=i; j<w_.rows(); j++, k++ )
 			w_(j,i) = w_(i,j) = v[k];
 }
-VectorXf MatrixCompatibility::gradient( const MatrixXf & b, const MatrixXf & Q ) const {
-	MatrixXf g = b * Q.transpose();
-	VectorXf r( w_.cols()*(w_.rows()+1)/2 );
+Eigen::VectorXf MatrixCompatibility::gradient( const Eigen::MatrixXf & b, const Eigen::MatrixXf & Q ) const {
+	Eigen::MatrixXf g = b * Q.transpose();
+	Eigen::VectorXf r( w_.cols()*(w_.rows()+1)/2 );
 	for( int i=0,k=0; i<g.cols(); i++ )
 		for( int j=i; j<g.rows(); j++, k++ )
 			r[k] = g(i,j) + (i!=j?g(j,i):0.f);

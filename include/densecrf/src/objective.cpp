@@ -34,7 +34,7 @@ ObjectiveFunction::~ObjectiveFunction(){
 }
 LogLikelihood::LogLikelihood( const VectorXs & gt, float robust ):gt_( gt ),robust_(robust){
 }
-double LogLikelihood::evaluate( MatrixXf & d_mul_Q, const MatrixXf & Q ) const {
+double LogLikelihood::evaluate( Eigen::MatrixXf & d_mul_Q, const Eigen::MatrixXf & Q ) const {
 	assert( gt_.rows() == Q.cols() );
 	const int N = Q.cols(), M = Q.rows();
 	double r = 0;
@@ -53,7 +53,7 @@ Hamming::Hamming( const VectorXs & gt, float class_weight_pow ):gt_( gt ){
 	for( int i=0; i<N; i++ )
 		if( gt[i] >= M )
 			M = gt[i]+1;
-	VectorXf cnt = VectorXf::Zero( M );
+	Eigen::VectorXf cnt = Eigen::VectorXf::Zero( M );
 	for( int i=0; i<N; i++ )
 		if( gt[i] >= 0 )
 			cnt[gt[i]] += 1;
@@ -61,9 +61,9 @@ Hamming::Hamming( const VectorXs & gt, float class_weight_pow ):gt_( gt ){
 	class_weight_ = class_weight_.array().pow( -class_weight_pow );
 	class_weight_ = class_weight_.array() / (cnt.array()*class_weight_.array()).sum();
 }
-Hamming::Hamming( const VectorXs & gt, const VectorXf & w ):gt_( gt ),class_weight_(w){
+Hamming::Hamming( const VectorXs & gt, const Eigen::VectorXf & w ):gt_( gt ),class_weight_(w){
 }
-double Hamming::evaluate( MatrixXf & d_mul_Q, const MatrixXf & Q ) const {
+double Hamming::evaluate( Eigen::MatrixXf & d_mul_Q, const Eigen::MatrixXf & Q ) const {
 	assert( gt_.rows() == Q.cols() );
 	const int N = Q.cols(), M = Q.rows();
 	double r = 0;
@@ -79,12 +79,12 @@ double Hamming::evaluate( MatrixXf & d_mul_Q, const MatrixXf & Q ) const {
 }
 IntersectionOverUnion::IntersectionOverUnion( const VectorXs & gt ):gt_( gt ){
 }
-double IntersectionOverUnion::evaluate( MatrixXf & d_mul_Q, const MatrixXf & Q ) const {
+double IntersectionOverUnion::evaluate( Eigen::MatrixXf & d_mul_Q, const Eigen::MatrixXf & Q ) const {
 	assert( gt_.rows() == Q.cols() );
 	const int N = Q.cols(), M = Q.rows();
 	d_mul_Q = 0*Q;
 	
-	VectorXd in(M), un(M);
+	Eigen::VectorXd in(M), un(M);
 	in.fill(0.f);
 	un.fill(1e-20);
 	for( int i=0; i<N; i++ ) {
