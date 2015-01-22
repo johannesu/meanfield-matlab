@@ -176,6 +176,8 @@ classdef Densecrf < handle
 			mf_dir = ['densecrf' filesep 'src' filesep];
 			trws_dir =  ['TRW_S-v1.3' filesep];
 			lbfgs_dir = ['densecrf' filesep 'external'  filesep 'liblbfgs' filesep 'lib' filesep];
+			maxflow_dir = ['maxflow-v3.03.src' filesep];
+
 			sources = {[mf_dir 'util.cpp'], ...
 				[mf_dir 'densecrf.cpp'], ...
 				[mf_dir 'labelcompatibility.cpp'], ...
@@ -188,7 +190,10 @@ classdef Densecrf < handle
 				[trws_dir 'minimize.cpp'], ...
 				[trws_dir 'MRFEnergy.cpp' ], ...
 				[trws_dir 'ordering.cpp'], ...
-				[trws_dir 'treeProbabilities.cpp' ]};
+				[trws_dir 'treeProbabilities.cpp' ], ...
+				[maxflow_dir 'maxflow.cpp'], ...
+				[maxflow_dir 'graph.cpp']};
+
 			% Only compile if files have changed
 			compile(cpp_file, out_file, sources, extra_arguments)
 		end
@@ -207,6 +212,7 @@ classdef Densecrf < handle
 			self.segmentation = segmentation;
 			self.solver = 'mean field approximation (explicit summations)';
 		end
+
 
 		function segmentation = threshold(self)
 			t = tic;
@@ -238,6 +244,10 @@ classdef Densecrf < handle
 		end
 
 		function [segmentation, energy, lower_bound] = trws(self)
+			if (self.num_labels() < 3) 
+				error('For binary problems use graph_cuts!')
+			end
+
 			settings = self.gather_settings;
 			settings.solver = 'trws';
 			self.compile('densecrf');
@@ -251,7 +261,29 @@ classdef Densecrf < handle
 			self.lower_bound = lower_bound;
 			self.solver = 'TRW-S';
 		end
-		
+
+		function segmentation = graph_cuts(self) 
+			if (self.num_labels() > 2) 
+				error('Graph cut only works for 2-label problems');
+			end
+
+			settings = self.gather_settings;
+			settings.solver = 'graph_cuts';
+			self.compile('densecrf');
+
+			% Only postive weights
+			offset = - min(self.unary_stacked(:));
+			
+			t = tic;
+			segmentation =  densecrf_mex(self.im_stacked, self.unary_stacked + offset, self.image_size, settings);
+			self.optimization_time = toc(t);
+
+			segmentation = segmentation+1;
+			self.segmentation = segmentation;
+			self.lower_bound = self.energy; % Always global optima.
+			self.solver = 'Graph cuts';
+		end
+
 		% Calculate exact energy of current solution
 		function energy = calculate_energy(self)
 			self.compile('energy');
@@ -313,7 +345,7 @@ classdef Densecrf < handle
 			segmentation(:) = mode(threshold(:));
 
 			self.segmentation = segmentation;
-			self.solver = 'most probable label'
+			self.solver = 'most probable label';
 		end
 
 		% No regularization cost

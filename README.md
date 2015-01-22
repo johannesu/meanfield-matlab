@@ -14,6 +14,7 @@ Included solvers
 * Mean field approximation, using approximate filtering [2].
 * Mean field approximation, performing all summations explicitly (slow). 
 * TRWS-S [3].
+* Graph cuts for 2 label problems.
 
 
 References
@@ -29,3 +30,6 @@ _Philipp Krähenbühl and Vladlen Koltun_.
 3. __Convergent Tree-reweighted Message Passing for Energy Minimization__. <br />
 IEEE Transactions on Pattern Analysis and Machine Intelligence (PAMI), 2006. <br />
 _Vladimir Kolmogorov_.
+
+4. __An Experimental Comparison of Min-Cut/Max-Flow Algorithms for Energy Minimization in Computer Vision__. <br />
+IEEE Transactions on Pattern Analysis and Machine Intelligence (PAMI), 2004 <br />

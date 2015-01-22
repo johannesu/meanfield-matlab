@@ -1,5 +1,7 @@
 #include "meanfield.h"
 #include "solvers.h"
+#include <memory>
+
 double timer;
 
 // Catch errors
@@ -50,10 +52,6 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
 
     assert(M > 0);
     assert(N > 0);
-
-    if (solver.compare("mean_field") && solver.compare("trws") && solver.compare("mean_field_explicit")) {
-        mexErrMsgTxt("Unknown solver");
-    }
 
     // Oracle function to get cost
     LinearIndex unaryLinearIndex(M,N, numberOfLabels);
@@ -123,11 +121,8 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
       energy(0) = crf.energy(map);
       bound(0) = lowestUnaryCost( unary_array, M,N,numberOfLabels );
 
-      return;
-    }
+    } else if (!solver.compare("mean_field_explicit"))  {
 
-    if(!solver.compare("mean_field_explicit"))
-    {
       if (debug)
         endTime("Solving using mean field approximation by explicit summation");
       // Init
@@ -193,11 +188,8 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
       energy(0) = std::numeric_limits<double>::quiet_NaN();
       bound(0) = std::numeric_limits<double>::quiet_NaN();
 
-      return;
-    }
 
-    if(!solver.compare("trws"))
-    {
+    } else if(!solver.compare("trws")) {
 
       if (debug)
         endTime("Convergent Tree-reweighted Message Passing");
@@ -252,5 +244,36 @@ void mexFunction(int nlhs, 		    /* number of expected outputs */
       delete nodes;
 
       return;
+    } else if (!solver.compare("graph_cuts")) {
+        int numEdges = numVariables*(numVariables-1)/2;
+        std::auto_ptr<GraphType> g (new GraphType(numVariables, numEdges));
+        g -> add_node(numVariables); 
+          
+        // Unary cost
+        for (int i = 0; i < numVariables; ++i) {
+          std::pair<int,int> p = linear2sub(i);
+          g->add_tweights(i, unaryCost( p, 1), unaryCost( p, 0));
+        }
+
+        // Pairwise cost
+        for (int i = 0; i < numVariables; i++) {
+        for (int j = i+1; j < numVariables; j++) {
+          std::pair<int,int> p0 = linear2sub(i);
+          std::pair<int,int> p1 = linear2sub(j);
+
+          double pcost = pairwiseCost( p0, p1 );
+          if (pcost >= min_pairwise_cost) g->add_edge(i ,j , pcost, pcost);
+        }
+        }
+
+        energy(0) = g->maxflow();
+        bound(0) = energy(0);
+
+        for (int i = 0; i < numVariables; ++i) {
+          result(i) = g->what_segment(i);
+        }
+
+    } else {
+      mexErrMsgTxt("Unkown solver.");
     }
 }
