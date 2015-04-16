@@ -14,7 +14,8 @@ classdef MSRC < Densecrf
 		% Wrapper for probImage decompress
 		function decompressed =  decompress(file_path)
 			
-			addpath('../include');
+            
+			addpath([fileparts(mfilename('fullpath')) '/include']);
 			
 			if ~(exist(file_path))
 				error('Unary file given does not exist')
@@ -74,7 +75,7 @@ classdef MSRC < Densecrf
 			
 			% Load ground truth
 			% MSRC
-			msrc_root = ['..' filesep 'data' filesep 'MSRC'];
+			msrc_root = [base_path  filesep 'data' filesep 'MSRC'];
 
 			gt_folder = [msrc_root filesep 'GroundTruth'];
 			
