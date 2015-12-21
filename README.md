@@ -1,12 +1,11 @@
 A MATLAB wrapper for solving DenseCRF problems [1,2]. 
 The code uses the c++ library provided with [2].
 
-How to use?
+Getting started
 ---
-
-* Solving a general problem see examples/example.m.
-
-* Segmentation on the MSRC-21 database using the unary potentials from [http://graphics.stanford.edu/projects/densecrf/unary/](http://graphics.stanford.edu/projects/densecrf/unary/) see examples/example_MSRC.m
+* Setup a C++ compiler in MATLAB using `mex -setup`, you will need to have a supported compiler installed, see [http://se.mathworks.com/support/compilers/R2015b/index.html](http://se.mathworks.com/support/compilers/R2015b/index.html) for a list.
+* To solve a general problem see examples/example.m.
+* To perform segmentation on the MSRC-21 database using the unary potentials from [http://graphics.stanford.edu/projects/densecrf/unary/](http://graphics.stanford.edu/projects/densecrf/unary/) see examples/example_MSRC.m
 
 ![Image and result](screenshot/screenshot.png)
 Included solvers
