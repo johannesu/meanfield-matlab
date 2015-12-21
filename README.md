@@ -3,17 +3,17 @@ The code uses the c++ library provided with [2].
 
 Getting started
 ---
-* Setup a C++ compiler in MATLAB using `mex -setup`, you will need to have a supported compiler installed, see [http://se.mathworks.com/support/compilers/R2015b/index.html](http://se.mathworks.com/support/compilers/R2015b/index.html) for a list.
-* To solve a general problem see examples/example.m.
+* Setup a C++ compiler in MATLAB using `mex -setup`, you will need to have a supported compiler installed, see [http://se.mathworks.com/support/compilers/index.html](http://se.mathworks.com/support/compilers/index.html) for a list
+* To solve a general problem see examples/example.m
 * To perform segmentation on the MSRC-21 database using the unary potentials from [http://graphics.stanford.edu/projects/densecrf/unary/](http://graphics.stanford.edu/projects/densecrf/unary/) see examples/example_MSRC.m
 
 ![Image and result](screenshot/screenshot.png)
 Included solvers
 --
-* Mean field approximation, using approximate filtering [2].
-* Mean field approximation, performing all summations explicitly (slow). 
-* TRWS-S [3].
-* Graph cuts for 2 label problems [4].
+* Mean field approximation, using approximate filtering [2]
+* Mean field approximation, performing all summations explicitly (slow)
+* TRWS-S [3]
+* Graph cuts for 2 label problems [4]
 
 
 References
