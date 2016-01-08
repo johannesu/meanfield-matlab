@@ -31,10 +31,10 @@
 
 class ExampleEnergy: public EnergyFunction {
 public:
-	virtual VectorXf initialValue() {
-		return VectorXf::Zero( 2 );
+	virtual Eigen::VectorXf initialValue() {
+		return Eigen::VectorXf::Zero( 2 );
 	}
-	virtual double gradient( const VectorXf & x, VectorXf & dx ) {
+	virtual double gradient( const Eigen::VectorXf & x, Eigen::VectorXf & dx ) {
 		double fx = (x[0] - 1)*(x[0] - 6) + (x[0] - 4)*(x[1] - 2)*(x[0] - 4)*(x[1] - 2) + x[1]*x[1];
 		dx[0] = 2*x[0] - 7 + 2*(x[1] - 2)*(x[0] - 4)*(x[1] - 2);
 		dx[1] = 2*x[1] + 2*(x[0] - 4)*(x[1] - 2)*(x[0] - 4);
@@ -45,9 +45,9 @@ public:
 
 int main() {
 	ExampleEnergy e;
-	VectorXf m = minimizeLBFGS( e, true );
+  Eigen::VectorXf m = minimizeLBFGS( e, true );
 	
-	VectorXf g( m.rows() );
+  Eigen::VectorXf g( m.rows() );
 	std::cout<<"Minimized "<<e.gradient(m,g)<<std::endl;
 	std::cout<<g<<std::endl;
 

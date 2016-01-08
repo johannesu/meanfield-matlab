@@ -34,11 +34,11 @@
 const float GT_PROB = 0.5;
 
 // Simple classifier that is 50% certain that the annotation is correct
-MatrixXf computeUnary( const VectorXs & lbl, int M ){
+Eigen::MatrixXf computeUnary( const VectorXs & lbl, int M ){
 	const float u_energy = -log( 1.0 / M );
 	const float n_energy = -log( (1.0 - GT_PROB) / (M-1) );
 	const float p_energy = -log( GT_PROB );
-	MatrixXf r( M, lbl.rows() );
+  Eigen::MatrixXf r( M, lbl.rows() );
 	r.fill(u_energy);
 	//printf("%d %d %d \n",im[0],im[1],im[2]);
 	for( int k=0; k<lbl.rows(); k++ ){
@@ -76,7 +76,7 @@ int main( int argc, char* argv[]){
 	}
 	
 	/////////// Put your own unary classifier here! ///////////
-	MatrixXf unary = computeUnary( getLabeling( anno, W*H, M ), M );
+  Eigen::MatrixXf unary = computeUnary( getLabeling( anno, W*H, M ), M );
 	///////////////////////////////////////////////////////////
 	
 	// Setup the CRF model
@@ -97,7 +97,7 @@ int main( int argc, char* argv[]){
 	crf.addPairwiseBilateral( 80, 80, 13, 13, 13, im, new PottsCompatibility( 10 ) );
 	
 	// Do map inference
-// 	MatrixXf Q = crf.startInference(), t1, t2;
+// 	Eigen::MatrixXf Q = crf.startInference(), t1, t2;
 // 	printf("kl = %f\n", crf.klDivergence(Q) );
 // 	for( int it=0; it<5; it++ ) {
 // 		crf.stepInference( Q, t1, t2 );

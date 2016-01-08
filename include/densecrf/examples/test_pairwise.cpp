@@ -33,20 +33,20 @@
 class PairwiseEnergy: public EnergyFunction {
 protected:
 	PairwisePotential p_;
-	MatrixXf v0_, v1_;
+	Eigen::MatrixXf v0_, v1_;
 public:
-	PairwiseEnergy( const MatrixXf & f, const MatrixXf & v0, const MatrixXf & v1 ):p_( f, new PottsCompatibility(), DIAG_KERNEL, NORMALIZE_SYMMETRIC ),v0_(v0),v1_(v1) {
+	PairwiseEnergy( const Eigen::MatrixXf & f, const Eigen::MatrixXf & v0, const Eigen::MatrixXf & v1 ):p_( f, new PottsCompatibility(), DIAG_KERNEL, NORMALIZE_SYMMETRIC ),v0_(v0),v1_(v1) {
 	}
-	virtual VectorXf initialValue() {
+	virtual Eigen::VectorXf initialValue() {
 		return p_.kernelParameters();
 	}
-	virtual void setInitialValue( const VectorXf & v ) {
+	virtual void setInitialValue( const Eigen::VectorXf & v ) {
 		p_.setKernelParameters( v );
 	}
-	virtual double gradient( const VectorXf & x, VectorXf & dx ) {//NORMALIZE_SYMMETRIC
+	virtual double gradient( const Eigen::VectorXf & x, Eigen::VectorXf & dx ) {//NORMALIZE_SYMMETRIC
 		p_.setKernelParameters( x );
 		dx = p_.kernelGradient( v0_, v1_ );
-		MatrixXf tmp = 0*v1_;
+		Eigen::MatrixXf tmp = 0*v1_;
 		p_.apply( tmp, v1_ );
 		return (tmp.array()*v0_.array()).sum();
 	}
@@ -54,13 +54,13 @@ public:
 
 int main() {
 	int N = 1000, M = 4, d = 2;
-	MatrixXf f = 0.3*MatrixXf::Random( d, N );
-	MatrixXf a = MatrixXf::Random( M, N ), b = MatrixXf::Random( M, N );
+	Eigen::MatrixXf f = 0.3*Eigen::MatrixXf::Random( d, N );
+	Eigen::MatrixXf a = Eigen::MatrixXf::Random( M, N ), b = Eigen::MatrixXf::Random( M, N );
 	PairwiseEnergy e( f.array(), a, a );
 	
-	VectorXf p = e.initialValue();
-// 	p = VectorXf::Random( p.rows() );
-	VectorXf g = p;
+	Eigen::VectorXf p = e.initialValue();
+// 	p = Eigen::VectorXf::Random( p.rows() );
+	Eigen::VectorXf g = p;
 	std::cout<<"start = "<<e.gradient( p, g )<<std::endl;
 // 	std::cout<<p.transpose()<<std::endl;
 	p = minimizeLBFGS( e, 5, 1 );
@@ -69,7 +69,7 @@ int main() {
 	std::cout<<"ng = "<<numericGradient( e, p ).transpose()<<std::endl;
 	std::cout<<"ng = "<<numericGradient( e, p, 1e-2 ).transpose()<<std::endl;
 // 	int id;
-// 	VectorXf dg = g.transpose()-numericGradient( e, p );
+// 	Eigen::VectorXf dg = g.transpose()-numericGradient( e, p );
 // 	dg.array().abs().maxCoeff( &id );
 // 	std::cout<<computeFunction( e, p-g, 0.02*g ).transpose()<<std::endl;
 }

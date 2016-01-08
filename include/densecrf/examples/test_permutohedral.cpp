@@ -33,27 +33,27 @@
 class PermutohedralEnergy: public EnergyFunction {
 protected:
 	Permutohedral p;
-	MatrixXf f_, v0_, v1_;
+	Eigen::MatrixXf f_, v0_, v1_;
 public:
-	PermutohedralEnergy( const MatrixXf & f, const MatrixXf & v0, const MatrixXf & v1 ):f_(f),v0_(v0), v1_(v1) {
+	PermutohedralEnergy( const Eigen::MatrixXf & f, const Eigen::MatrixXf & v0, const Eigen::MatrixXf & v1 ):f_(f),v0_(v0), v1_(v1) {
 		p.init( f );
 	}
-	virtual VectorXf initialValue() {
-		MatrixXf f = f_;
+	virtual Eigen::VectorXf initialValue() {
+		Eigen::MatrixXf f = f_;
 		f.resize( f_.cols()*f_.rows(), 1 );
 		return f;
 	}
-	virtual void setInitialValue( const VectorXf & v ) {
-		MatrixXf f = v;
+	virtual void setInitialValue( const Eigen::VectorXf & v ) {
+		Eigen::MatrixXf f = v;
 		f.resize( f_.rows(), f_.cols() );
 		f_ = f;
 	}
-	virtual double gradient( const VectorXf & x, VectorXf & dx ) {
-		MatrixXf f = x;
+	virtual double gradient( const Eigen::VectorXf & x, Eigen::VectorXf & dx ) {
+		Eigen::MatrixXf f = x;
 		f.resizeLike( f_ );
 		p.init( f );
 		
-		MatrixXf bv = p.compute( v1_, true );
+		Eigen::MatrixXf bv = p.compute( v1_, true );
 		dx = 0*x;
 		p.gradient( dx.data(), v0_.data(), v1_.data(), v0_.rows() );
 		
@@ -63,9 +63,9 @@ public:
 
 int main() {
 	int N = 1000, M = 4, d = 4;
-	MatrixXf f = 0.3*MatrixXf::Random( d, N );
-	MatrixXf a = MatrixXf::Random( M, N ), b = MatrixXf::Random( M, N );
-	MatrixXf p;
+	Eigen::MatrixXf f = 0.3*Eigen::MatrixXf::Random( d, N );
+	Eigen::MatrixXf a = Eigen::MatrixXf::Random( M, N ), b = Eigen::MatrixXf::Random( M, N );
+	Eigen::MatrixXf p;
 	PermutohedralEnergy e( f.array(), a, b );
 	if( !p.cols() || !p.rows() )
 		p = e.initialValue();
@@ -73,7 +73,7 @@ int main() {
 		p.array() += 0.1;
 		e.setInitialValue( p );
 	}
-	VectorXf g = p;
+	Eigen::VectorXf g = p;
 	std::cout<<"start = "<<e.gradient( p, g )<<std::endl;
 	std::cout<<p.transpose()<<std::endl;
 	p = minimizeLBFGS( e, 5, 0 );
@@ -82,7 +82,7 @@ int main() {
 	std::cout<<"ng = "<<numericGradient( e, p ).transpose()<<std::endl;
 	std::cout<<"ng = "<<numericGradient( e, p, 1e-2 ).transpose()<<std::endl<<std::endl;
 	int id;
-	VectorXf dg = g-numericGradient( e, p );
+	Eigen::VectorXf dg = g-numericGradient( e, p );
 	dg.array().abs().maxCoeff( &id );
 	std::cout<<computeFunction( e, p-g, 0.02*g ).transpose()<<std::endl;
 }
