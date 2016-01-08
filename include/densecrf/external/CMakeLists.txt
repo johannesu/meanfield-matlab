@@ -1,2 +1,2 @@
 include_directories( liblbfgs/include )
-add_library( lbfgs liblbfgs/lib/lbfgs.c )
+add_library( lbfgs liblbfgs/lib/lbfgs.cpp )

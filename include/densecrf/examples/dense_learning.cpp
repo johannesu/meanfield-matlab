@@ -113,7 +113,7 @@ int main( int argc, char* argv[]){
 	
 	// Get the logistic features (unary term)
 	// Here we just use the color as a feature
-	MatrixXf logistic_feature( 4, N ), logistic_transform( M, 4 );
+  Eigen::MatrixXf logistic_feature( 4, N ), logistic_transform( M, 4 );
 	logistic_feature.fill( 1.f );
 	for( int i=0; i<N; i++ )
 		for( int k=0; k<3; k++ )
@@ -131,7 +131,7 @@ int main( int argc, char* argv[]){
 	// Add simple pairwise potts terms
 	crf.addPairwiseGaussian( 3, 3, new PottsCompatibility( 1 ) );
 	// Add a longer range label compatibility term
-	crf.addPairwiseBilateral( 80, 80, 13, 13, 13, im, new MatrixCompatibility( MatrixXf::Identity(M,M) ) );
+  crf.addPairwiseBilateral( 80.0f, 80.0f, 13.0f, 13.0f, 13.0f, im, new MatrixCompatibility( Eigen::MatrixXf::Identity(M,M) ) );
 	
 	// Choose your loss function
 // 	LogLikelihood objective( labeling, 0.01 ); // Log likelihood loss
@@ -143,7 +143,7 @@ int main( int argc, char* argv[]){
 	int NIT = 5;
 	const bool verbose = true;
 	
-	MatrixXf learning_params( 3, 3 );
+  Eigen::MatrixXf learning_params( 3, 3 );
 	// Optimize the CRF in 3 phases:
 	//  * First unary only
 	//  * Unary and pairwise
