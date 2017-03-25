@@ -8,6 +8,7 @@ Getting started
 * To perform segmentation on the MSRC-21 database using the unary potentials from [http://graphics.stanford.edu/projects/densecrf/unary/](http://graphics.stanford.edu/projects/densecrf/unary/) see examples/example_MSRC.m
 
 ![Image and result](screenshot/screenshot.png)
+
 Included solvers
 --
 * Mean field approximation, using approximate filtering [2]
