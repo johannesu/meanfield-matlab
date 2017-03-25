@@ -2,7 +2,7 @@ A MATLAB wrapper for solving DenseCRF problems [1,2].
 The code uses the c++ library provided with [2].
 
 Getting started
----
+--
 * Setup a C++ compiler in MATLAB using `mex -setup`, you will need to have a supported compiler installed, see [https://www.mathworks.com/support/compilers.html](https://www.mathworks.com/support/compilers.html) for a list
 * To solve a general problem see examples/example.m
 * To perform segmentation on the MSRC-21 database using the unary potentials from [http://graphics.stanford.edu/projects/densecrf/unary/](http://graphics.stanford.edu/projects/densecrf/unary/) see examples/example_MSRC.m
@@ -13,12 +13,12 @@ Included solvers
 --
 * Mean field approximation, using approximate filtering [2]
 * Mean field approximation, performing all summations explicitly (slow)
-* TRWS-S [3]
-* Graph cuts for 2 label problems [4]
+* TRW-S [3]
+* Graph cuts [4] (only works for 2 label problems)
 
 
 References
------
+--
 1. __Efficient Inference in Fully Connected CRFs with Gaussian Edge Potentials__. <br />
 Conference on Neural Information Processing Systems (NIPS), 2011. <br />
 _Philipp Krähenbühl and Vladlen Koltun_.
